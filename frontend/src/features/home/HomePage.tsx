@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Navbar } from '@/components/navigation/Navbar'
-import { ArrowUp, Play, Plus, ChevronDown } from 'lucide-react'
+import { ArrowUp, Play, Plus, ChevronDown, TrendingUp } from 'lucide-react'
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate()
@@ -10,6 +10,7 @@ export const HomePage: React.FC = () => {
   const [saveChat, setSaveChat] = useState(true)
   const [modelDropdownOpen, setModelDropdownOpen] = useState(false)
   const [demoModalOpen, setDemoModalOpen] = useState(false)
+  const [faqOpenIndex, setFaqOpenIndex] = useState(0)
 
   const availableModels = [
     { id: 'swimore/auto-fast', name: 'swimore/auto-fast (Sub-second fallback)' },
@@ -17,6 +18,41 @@ export const HomePage: React.FC = () => {
     { id: 'llama-3-3-70b', name: 'Llama 3.3 70B (@novacompute)' },
     { id: 'deepseek-r1', name: 'DeepSeek R1 (@tokenforge)' },
     { id: 'gpt-4o', name: 'GPT-4o (Direct Provider)' },
+  ]
+
+  const faqs = [
+    {
+      q: 'What is Swimore AI?',
+      a: 'Swimore is a multi-provider AI chat, API gateway and API marketplace in one place. Users reach 200+ models through one OpenAI-compatible endpoint with routing and fallback, and partners bring AI services or sell API access to them.',
+    },
+    {
+      q: 'How do I migrate an existing app?',
+      a: 'To migrate, you simply update your API endpoint to the unified Swimore URL and the routing layer handles the rest; no code changes required.',
+    },
+    {
+      q: 'How does automatic fallback work?',
+      a: 'Automatic fallback monitors each provider\'s health and instantly routes to the next available model if a timeout or error occurs.',
+    },
+    {
+      q: 'Do you add a markup to token prices?',
+      a: 'No, token prices are fixed per plan; we do not apply any markup.',
+    },
+    {
+      q: 'Are my prompts logged?',
+      a: 'Prompts are not logged by default; you can enable chat history per session if desired.',
+    },
+    {
+      q: 'Can I choose whether my chats are saved?',
+      a: 'Chat history is saved per user by default; you can disable it in settings.',
+    },
+    {
+      q: 'How do I join as a partner?',
+      a: 'Partners join via the marketplace, where they can list their APIs or provide direct integration.',
+    },
+    {
+      q: 'Which models can I use?',
+      a: 'All models accessible through the OpenAI-compatible API, including 200+ models from various providers.',
+    },
   ]
 
   const handleSendPrompt = (e?: React.FormEvent) => {
@@ -318,10 +354,396 @@ export const HomePage: React.FC = () => {
                     </div>
                   </div>
                 </div>
+                {/* Footer row at card level */}
+                <div className="flex items-center justify-between pt-2 border-t border-[#22272B]/60 text-xs font-mono">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#00E599]" />
+                    <span className="text-[#98A0A8]">Direct route selected</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#98A0A8]" />
+                    <span className="text-[#98A0A8]">Zero failover drop</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#00E599]" />
+                    <span className="text-[#00E599]">Status 200 OK</span>
+                  </div>
+                </div>
+                <div className="flex justify-between mt-2 text-xs font-mono text-[#98A0A8]">
+                  <div>Telemetry: 16-sample rolling window</div>
+                  <div>P99: 44ms · Loss: 0.00%</div>
+                </div>
               </div>
             </div>
           </div>
         </section>
+
+        {/* Stats Band */}
+        <section className="w-full max-w-[1240px] py-12 mb-12">
+          <div className="flex flex-col sm:flex-row gap-6">
+            <div className="flex flex-col gap-2 rounded-2xl border border-[#22272B] bg-[#0A0C0E] p-6">
+              <div className="text-5xl font-semibold text-[#F5F5F2]">12ms</div>
+              <div className="text-sm text-[#98A0A8] font-mono uppercase tracking-widest">Avg latency</div>
+              <div className="text-[9px] text-[#98A0A8] uppercase tracking-widest">ILLUSTRATIVE</div>
+            </div>
+            <div className="flex flex-col gap-2 rounded-2xl border border-[#22272B] bg-[#0A0C0E] p-6">
+              <div className="text-5xl font-semibold text-[#F5F5F2]">99.99%</div>
+              <div className="text-sm text-[#98A0A8] font-mono uppercase tracking-widest">Gateway uptime</div>
+              <div className="text-[9px] text-[#98A0A8] uppercase tracking-widest">SLA BACKED</div>
+            </div>
+            <div className="flex flex-col gap-2 rounded-2xl border border-[#22272B] bg-[#0A0C0E] p-6">
+              <div className="text-5xl font-semibold text-[#F5F5F2]">250+</div>
+              <div className="text-sm text-[#98A0A8] font-mono uppercase tracking-widest">Connected models</div>
+              <div className="text-[9px] text-[#98A0A8] uppercase tracking-widest">OPENAI / OSS / BEDROCK</div>
+            </div>
+            <div className="flex flex-col gap-2 rounded-2xl border border-[#22272B] bg-[#0A0C0E] p-6">
+              <div className="text-5xl font-semibold text-[#00E599]">{'\u003C'}50ms</div>
+              <div className="text-sm text-[#98A0A8] font-mono uppercase tracking-widest">SLA Auto-failover</div>
+              <div className="text-[9px] text-[#98A0A8] uppercase tracking-widest">ZERO-DROP BUFFER</div>
+            </div>
+          </div>
+        </section>
+
+        {/* 01 · TWO WAYS TO JOIN */}
+        <section className="w-full max-w-[1240px] py-12 mb-12">
+          <div className="flex items-center gap-2 mb-6">
+            <span className="w-2 h-2 rounded-full bg-[#00E599]" />
+            <span className="font-mono text-xs uppercase tracking-widest text-[#00E599]">
+              01 · TWO WAYS TO JOIN
+            </span>
+          </div>
+          <h2 className="text-3xl font-serif leading-tight">Users consume APIs.</h2>
+          <h2 className="text-3xl font-serif leading-tight">Partners supply them.</h2>
+          <p className="text-3xl font-serif italic leading-tight text-[#98A0A8]">
+            Swimore connects them.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
+            <div className="rounded-2xl border border-[#22272B] bg-[#0A0C0E] p-6">
+              <div className="text-xs font-mono text-[#00E599] uppercase tracking-widest">
+                FOR USERS
+              </div>
+              <h3 className="text-2xl font-serif mt-2">Join as a User</h3>
+              <p className="text-base text-[#98A0A8] mt-3">
+                Use AI APIs. Access multiple providers and models through one unified gateway.
+              </p>
+              <div className="flex flex-wrap gap-2 mt-4">
+                <div className="rounded-full border border-[#22272B] px-3 py-1.5 text-xs text-[#98A0A8]">
+                  API keys
+                </div>
+                <div className="rounded-full border border-[#22272B] px-3 py-1.5 text-xs text-[#98A0A8]">
+                  Model discovery
+                </div>
+                <div className="rounded-full border border-[#22272B] px-3 py-1.5 text-xs text-[#98A0A8]">
+                  Usage tracking
+                </div>
+                <div className="rounded-full border border-[#22272B] px-3 py-1.5 text-xs text-[#98A0A8]">
+                  Routing and fallback
+                </div>
+              </div>
+              <Link
+                to="/chat"
+                className="mt-4 inline-block bg-[#F5F5F2] text-[#060808] rounded-full px-4 py-2 hover:bg-white"
+              >
+                Get Started →
+              </Link>
+            </div>
+            <div className="rounded-2xl border border-[#22272B] bg-[#0A0C0E] p-6">
+              <div className="text-xs font-mono text-[#E5A93C] uppercase tracking-widest">
+                FOR PARTNERS
+              </div>
+              <h3 className="text-2xl font-serif mt-2">Join as a Partner</h3>
+              <p className="text-base text-[#98A0A8] mt-3">
+                Bring AI services to Swimore. Connect API providers or sell API access through the marketplace.
+              </p>
+              <div className="flex flex-wrap gap-2 mt-4">
+                <div className="rounded-full border border-[#22272B] px-3 py-1.5 text-xs text-[#98A0A8]">
+                  Provider integration
+                </div>
+                <div className="rounded-full border border-[#22272B] px-3 py-1.5 text-xs text-[#98A0A8]">
+                  API listings
+                </div>
+                <div className="rounded-full border border-[#22272B] px-3 py-1.5 text-xs text-[#98A0A8]">
+                  Sales
+                </div>
+                <div className="rounded-full border border-[#22272B] px-3 py-1.5 text-xs text-[#98A0A8]">
+                  Usage analytics
+                </div>
+              </div>
+              <Link
+                to="/marketplace"
+                className="mt-4 inline-block border border-[#F5F5F2] text-[#F5F5F2] rounded-full px-4 py-2 hover:bg-[#0A0C0E]"
+              >
+                Become a Partner →
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Featured Row */}
+        <section className="w-full max-w-[1240px] py-12 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="flex flex-col items-start gap-4 rounded-2xl border border-[#22272B] bg-[#0A0C0E] p-6">
+              <div className="text-xs font-mono text-[#98A0A8] uppercase tracking-widest">
+                FEATURED PIPELINE · 01/05
+              </div>
+              <h3 className="text-2xl font-serif">DeepSeek V3 + Llama 3.3 Hybrid</h3>
+              <p className="text-base text-[#98A0A8]">
+                Dynamic fallback with an illustrative 45% cost reduction.
+              </p>
+              <div className="flex items-center justify-between mt-3">
+                <div className="flex items-center gap-2">
+                  <div className="rounded-full border border-[#22272B] px-2 py-1 text-xs text-[#98A0A8]">
+                    01
+                  </div>
+                  <div className="rounded-full border border-[#22272B] px-2 py-1 text-xs text-[#98A0A8]">
+                    02
+                  </div>
+                  <div className="rounded-full border border-[#22272B] px-2 py-1 text-xs text-[#98A0A8]">
+                    03
+                  </div>
+                </div>
+                <div className="text-xs font-mono">← →</div>
+              </div>
+            </div>
+            <div className="flex flex-col items-start gap-4 rounded-2xl border border-[#22272B] bg-[#0A0C0E] p-6">
+              <div className="text-xs font-mono text-[#98A0A8] uppercase tracking-widest">
+                ROUTE HEALTH · 24H SAMPLE
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between border-b border-[#22272B]/50 pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="text-2xl font-mono text-[#F5F5F2]">18ms</div>
+                    <div className="text-[#98A0A8]">P50 latency</div>
+                  </div>
+                  <span className="text-[#98A0A8]"><TrendingUp className="w-4 h-4" /></span>
+                </div>
+                <div className="flex items-center justify-between border-b border-[#22272B]/50 pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="text-2xl font-mono text-[#F5F5F2]">0.2%</div>
+                    <div className="text-[#98A0A8]">Fallback rate</div>
+                  </div>
+                  <span className="text-[#98A0A8]"><TrendingUp className="w-4 h-4" /></span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="text-2xl font-mono text-[#F5F5F2]">96.4%</div>
+                    <div className="text-[#98A0A8]">Policy match</div>
+                  </div>
+                  <span className="text-[#98A0A8]"><TrendingUp className="w-4 h-4" /></span>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col items-start gap-4 rounded-2xl border border-[#22272B] bg-[#0A0C0E] p-6 relative">
+              <div className="text-xs font-mono text-[#98A0A8] uppercase tracking-widest">
+                DEPLOY · 02 MIN
+              </div>
+              <h3 className="text-2xl font-serif">Bring Your Models To Life</h3>
+              <p className="text-base text-[#98A0A8]">
+                Start building with unified API keys in under 2 minutes.
+              </p>
+              <Link
+                to="/docs"
+                className="absolute top-2 right-2 text-[#00E599]"
+              >
+                <span className="w-2 h-2 rounded-full bg-[#00E599]">
+                  ↗
+                </span>
+              </Link>
+              <Link to="/docs" className="text-[#00E599]">
+                Read quickstart →
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* 02 · FEATURES */}
+        <section className="w-full max-w-[1240px] py-12 mb-12">
+          <div className="flex justify-between items-start mb-6">
+            <div className="flex flex-col gap-1">
+              <div className="font-mono text-xs uppercase tracking-widest text-[#00E599]">
+                02 · FEATURES
+              </div>
+              <h2 className="text-3xl font-serif leading-tight">
+                Everything the gateway
+              </h2>
+              <p className="text-2xl font-serif italic leading-tight text-[#98A0A8]">
+                handles for you.
+              </p>
+            </div>
+            <p className="text-base text-[#98A0A8] max-w-lg leading-relaxed">
+              One endpoint, one key, and a routing layer that keeps your app fast, cheap and online while the model landscape changes underneath.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="flex flex-col items-start gap-2 rounded-xl border border-[#22272B] bg-[#0A0C0E] p-5">
+              <div className="text-xs font-mono text-[#00E599] uppercase tracking-widest">
+                01
+              </div>
+              <div className="font-bold text-[#F5F5F2]">One unified API</div>
+              <div className="text-sm text-[#98A0A8]">
+                Keep the OpenAI request shape and reach 200+ models with a single key. Change one base URL and you are routed.
+              </div>
+            </div>
+            <div className="flex flex-col items-start gap-2 rounded-xl border border-[#22272B] bg-[#0A0C0E] p-5">
+              <div className="text-xs font-mono text-[#00E599] uppercase tracking-widest">
+                02
+              </div>
+              <div className="font-bold text-[#F5F5F2]">Latency-first routing</div>
+              <div className="text-sm text-[#98A0A8]">
+                A policy-driven router sends each request to the fastest healthy model, with a live trace of every decision.
+              </div>
+            </div>
+            <div className="flex flex-col items-start gap-2 rounded-xl border border-[#22272B] bg-[#0A0C0E] p-5">
+              <div className="text-xs font-mono text-[#00E599] uppercase tracking-widest">
+                03
+              </div>
+              <div className="font-bold text-[#F5F5F2]">Automatic fallback</div>
+              <div className="text-sm text-[#98A0A8]">
+                Timeouts and provider errors hop to the next model in your chain, so a bad minute upstream is not your outage.
+              </div>
+            </div>
+            <div className="flex flex-col items-start gap-2 rounded-xl border border-[#22272B] bg-[#0A0C0E] p-5">
+              <div className="text-xs font-mono text-[#00E599] uppercase tracking-widest">
+                04
+              </div>
+              <div className="font-bold text-[#F5F5F2]">Cost-optimized blends</div>
+              <div className="text-sm text-[#98A0A8]">
+                Mix models by task and price. Compare a fixed provider against a dynamic route and see the estimated savings.
+              </div>
+            </div>
+            <div className="flex flex-col items-start gap-2 rounded-xl border border-[#22272B] bg-[#0A0C0E] p-5">
+              <div className="text-xs font-mono text-[#00E599] uppercase tracking-widest">
+                05
+              </div>
+              <div className="font-bold text-[#F5F5F2]">Private by choice</div>
+              <div className="text-sm text-[#98A0A8]">
+                Chat with history saved or switched off, your call. Enterprise Gateway adds zero-log compliance and SOC 2 Type II.
+              </div>
+            </div>
+            <div className="flex flex-col items-start gap-2 rounded-xl border border-[#22272B] bg-[#0A0C0E] p-5">
+              <div className="text-xs font-mono text-[#00E599] uppercase tracking-widest">
+                06
+              </div>
+              <div className="font-bold text-[#F5F5F2]">Live benchmarks</div>
+              <div className="text-sm text-[#98A0A8]">
+                Track TTFT, throughput, quality and uptime by region and timeframe, then pin the model that fits your budget.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 03 · FAQ */}
+        <section className="w-full max-w-[1240px] py-12 mb-12">
+          <div className="flex flex-col md:flex-row gap-12">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-6">
+                <span className="w-2 h-2 rounded-full bg-[#00E599]" />
+                <span className="font-mono text-xs uppercase tracking-widest text-[#00E599]">
+                  03 · FAQ
+                </span>
+              </div>
+              <h2 className="text-3xl font-serif leading-tight">Questions,</h2>
+              <p className="text-3xl font-serif italic leading-tight text-[#98A0A8]">
+                answered.
+              </p>
+              <p className="text-base text-[#98A0A8] max-w-lg leading-relaxed mt-4">
+                Can't find what you need? The docs cover every endpoint, or talk to us about a dedicated gateway.
+              </p>
+              <div className="flex items-center gap-4 mt-6">
+                <Link
+                  to="/docs"
+                  className="text-xs text-[#98A0A8] hover:text-[#F5F5F2]"
+                >
+                  Read the docs →
+                </Link>
+                <a
+                  href="mailto:contact@swimore.ai"
+                  className="text-xs text-[#98A0A8] hover:text-[#F5F5F2]"
+                >
+                  Contact sales →
+                </a>
+              </div>
+            </div>
+            <div className="flex-1 min-w-0 space-y-2">
+              {faqs.map((item, i) => {
+                const isOpen = faqOpenIndex === i
+                return (
+                  <div key={i} className="space-y-1">
+                    <div
+                      onClick={() => setFaqOpenIndex(isOpen ? -1 : i)}
+                      className="flex items-center justify-between border-t border-[#22272B] pt-3 pb-2 cursor-pointer hover:bg-[#0A0C0E]/50"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full border border-[#22272B] text-[#98A0A8] flex items-center justify-center text-xs">
+                          {isOpen ? '−' : '+'}
+                        </div>
+                        <div className="font-medium text-[#F5F5F2]">{item.q}</div>
+                      </div>
+                    </div>
+                    {isOpen && (
+                      <div className="pt-2 text-sm text-[#98A0A8]">{item.a}</div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Panel */}
+        <section className="w-full max-w-[1240px] py-12 mb-12">
+          <div className="rounded-2xl border border-[#22272B] bg-[#0A0C0E] p-8 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex flex-col gap-2">
+              <div className="font-mono text-xs uppercase tracking-widest text-[#00E599]">
+                GET STARTED · 02 MIN
+              </div>
+              <h2 className="text-3xl font-serif leading-tight">
+                Route your first request
+              </h2>
+              <p className="text-xl font-serif italic leading-tight text-[#98A0A8]">
+                in under two minutes.
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <Link
+                to="/chat"
+                className="bg-[#F5F5F2] text-[#060808] rounded-full px-6 py-3 hover:bg-white"
+              >
+                Get Started →
+              </Link>
+              <Link
+                to="/marketplace"
+                className="border border-[#F5F5F2] text-[#F5F5F2] rounded-full px-6 py-3 hover:bg-[#0A0C0E]"
+              >
+                Become a Partner →
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="w-full border-t border-[#22272B]/40 pt-8 pb-12">
+          <div className="max-w-[1240px] mx-auto px-6 flex justify-between items-center">
+            <div className="text-xs font-mono uppercase tracking-widest text-[#98A0A8]">
+              SWIMORE AI · ALL FIGURES ARE SAMPLE DATA
+            </div>
+            <div className="flex gap-6">
+              <Link to="/models" className="text-xs text-[#98A0A8] hover:text-[#F5F5F2]">
+                Models →
+              </Link>
+              <Link to="/marketplace" className="text-xs text-[#98A0A8] hover:text-[#F5F5F2]">
+                Marketplace Partner →
+              </Link>
+              <Link to="/pricing" className="text-xs text-[#98A0A8] hover:text-[#F5F5F2]">
+                Pricing →
+              </Link>
+              <Link to="/docs" className="text-xs text-[#98A0A8] hover:text-[#F5F5F2]">
+                Docs →
+              </Link>
+            </div>
+          </div>
+        </footer>
+
       </main>
 
       {/* Demo Modal */}

@@ -40,4 +40,5 @@ Thumbs.db
 # Architecture, Internal PRDs & Sensitive Planning Documents
 docs/
 scratch/
-
+ui-ux/
+guides.md
