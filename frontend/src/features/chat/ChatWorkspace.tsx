@@ -12,6 +12,7 @@ import {
   SlidersHorizontal,
   Copy,
   AlertTriangle,
+  X,
 } from 'lucide-react'
 import { useChatStore } from '@/store/chat-store'
 import { useSessionStore } from '@/store/session-store'
@@ -81,6 +82,24 @@ export const ChatWorkspace: React.FC = () => {
     setTimeout(() => setCopiedId(null), 2000)
   }
 
+  const parseMessageContent = (content: string) => {
+    const segments: Array<{ type: 'text' | 'code'; content: string; lang: string }> = []
+    const fenceRegex = /```(\w*)\n([\s\S]*?)```/g
+    let lastIndex = 0
+    let match
+    while ((match = fenceRegex.exec(content)) !== null) {
+      if (match.index > lastIndex) {
+        segments.push({ type: 'text', content: content.slice(lastIndex, match.index), lang: '' })
+      }
+      segments.push({ type: 'code', content: match[2], lang: match[1] || 'bash' })
+      lastIndex = match.index + match[0].length
+    }
+    if (lastIndex < content.length) {
+      segments.push({ type: 'text', content: content.slice(lastIndex), lang: '' })
+    }
+    return segments
+  }
+
   const handleReportIncident = async () => {
     try {
       const res = await fetch('/api/v1/incidents/report', {
@@ -108,7 +127,7 @@ export const ChatWorkspace: React.FC = () => {
   )
 
   return (
-    <div className="flex h-screen w-screen bg-[#060808] text-[#F5F5F2] overflow-hidden font-sans">
+    <div className="flex h-screen w-screen bg-[#060808] text-[#F5F5F2] overflow-hidden font-sans ocean-bg">
       {/* ======================================================== */}
       {/* EXACT FIGMA LEFT SIDEBAR                                 */}
       {/* ======================================================== */}
@@ -272,9 +291,17 @@ export const ChatWorkspace: React.FC = () => {
             {isPrivateMode ? (
               <span className="font-medium text-[#F5F5F2] flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5 text-[#E0A458]" /> Private chat
+                <span className="text-[#98A0A8] font-mono text-xs mx-1">/</span>
+                <span className="text-[#98A0A8] font-mono text-xs">{activeModel}</span>
+                <ChevronDown className="w-3 h-3 text-[#98A0A8]" />
               </span>
             ) : (
-              <span className="font-medium text-[#F5F5F2]">New chat</span>
+              <span className="font-medium text-[#F5F5F2] flex items-center gap-1.5">
+                New chat
+                <span className="text-[#98A0A8] font-mono text-xs mx-1">/</span>
+                <span className="text-[#98A0A8] font-mono text-xs">{activeModel}</span>
+                <ChevronDown className="w-3 h-3 text-[#98A0A8]" />
+              </span>
             )}
           </div>
 
@@ -303,9 +330,18 @@ export const ChatWorkspace: React.FC = () => {
             {/* EXACT FIGMA PRIVACY DROPDOWN */}
             {privacyDropdownOpen && (
               <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl bg-[#0E1215] border border-[#22272B] p-4 shadow-2xl z-30 flex flex-col gap-3">
-                <span className="text-[10px] font-mono tracking-wider text-[#98A0A8] uppercase">
-                  THIS CHAT
-                </span>
+                <div className="flex items-start justify-between">
+                  <span className="text-[10px] font-mono tracking-wider text-[#98A0A8] uppercase">
+                    THIS CHAT
+                  </span>
+                  <button
+                    onClick={() => setPrivacyDropdownOpen(false)}
+                    className="text-[#98A0A8] hover:text-[#F5F5F2] p-1 transition-colors"
+                    title="Close"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
 
                 {/* Option 1: Save to account */}
                 <div
@@ -367,7 +403,7 @@ export const ChatWorkspace: React.FC = () => {
         {isPrivateMode && (
           <div className="bg-[#2A1D0B]/80 border-b border-[#E0A458]/40 px-6 py-2 flex items-center justify-between text-xs text-[#E0A458] z-10 flex-shrink-0">
             <span className="flex items-center gap-2">
-              <Lock className="w-3.5 h-3.5" /> Private chat. Not saved to your account and nothing is logged.
+              <Lock className="w-3.5 h-3.5" /> Private session. No queries or responses are stored. Zero-log mode active.
             </span>
             <button
               onClick={() => setIsPrivateMode(false)}
@@ -415,11 +451,45 @@ export const ChatWorkspace: React.FC = () => {
                         <span className="font-mono text-[10px] tracking-widest text-[#98A0A8] uppercase">
                           SWIMORE
                         </span>
+                        <span className="text-[#98A0A8]">·</span>
+                        <span className="font-mono text-[10px] tracking-widest text-[#98A0A8]">
+                          {msg.routingTrace?.model ?? 'swimore/auto-fast'} via Swimore SmartRouter
+                        </span>
                       </div>
 
-                      <div className="text-sm text-[#F5F5F2] leading-relaxed whitespace-pre-wrap">
-                        {msg.content}
-                      </div>
+                      {parseMessageContent(msg.content).map((seg, i) => {
+                        if (seg.type === 'code') {
+                          const codeId = `${msg.id}-code-${i}`
+                          return (
+                            <div key={i} className="flex flex-col gap-0">
+                              <div className="flex items-center justify-between border-b border-[#22272B] bg-[#121619] px-3 py-1.5 rounded-t-lg">
+                                <span className="font-mono text-[10px] tracking-widest text-[#98A0A8] uppercase">
+                                  {seg.lang}
+                                </span>
+                                <button
+                                  onClick={() => handleCopy(seg.content, codeId)}
+                                  className="text-[#98A0A8] hover:text-[#F5F5F2] p-1 transition-colors"
+                                  title="Copy code"
+                                >
+                                  {copiedId === codeId ? (
+                                    <Check className="w-3.5 h-3.5 text-[#00E599]" />
+                                  ) : (
+                                    <Copy className="w-3.5 h-3.5" />
+                                  )}
+                                </button>
+                              </div>
+                              <div className="bg-[#0E1215] border border-[#22272B] rounded-b-lg p-3 font-mono text-xs whitespace-pre-wrap text-[#98A0A8]">
+                                {seg.content}
+                              </div>
+                            </div>
+                          )
+                        }
+                        return (
+                          <div key={i} className="text-sm text-[#F5F5F2] leading-relaxed whitespace-pre-wrap">
+                            {seg.content}
+                          </div>
+                        )
+                      })}
 
                       {/* Routing Tracer Pill */}
                       {msg.routingTrace && (
@@ -427,7 +497,7 @@ export const ChatWorkspace: React.FC = () => {
                           <div className="inline-flex items-center gap-2 py-1 px-3 rounded-full border border-[#22272B] bg-[#0A0C0E] text-[11px] font-mono text-[#98A0A8]">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#00E599]" />
                             <span>
-                              {msg.routingTrace.path} · {msg.routingTrace.model} · {msg.routingTrace.latencyMs} ms
+                              {msg.routingTrace.path} · {msg.routingTrace.model} · +{msg.routingTrace.latencyMs} ms · $0.0021 · 200 OK
                             </span>
                           </div>
 

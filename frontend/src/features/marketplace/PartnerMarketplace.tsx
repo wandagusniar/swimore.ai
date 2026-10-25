@@ -3,7 +3,7 @@ import { Navbar } from '@/components/navigation/Navbar'
 import { Search, ChevronDown, Check, X, ArrowRight } from 'lucide-react'
 
 export const PartnerMarketplace: React.FC = () => {
-  const [selectedPartners, setSelectedPartners] = useState<string[]>(['@novacompute', '@gridai'])
+  const [selectedPartners, setSelectedPartners] = useState<string[]>(['@novacompute', '@gpt4u'])
   const [filterCategory, setFilterCategory] = useState('All')
   const [searchQuery, setSearchQuery] = useState('')
   const [registerModalOpen, setRegisterModalOpen] = useState(false)
@@ -29,46 +29,46 @@ export const PartnerMarketplace: React.FC = () => {
       id: 'novacompute',
       handle: '@novacompute',
       initials: 'NC',
-      model: 'Claude 3.5 Sonnet',
+      model: 'Llama 3.1 8B instruct',
       verified: true,
-      tags: ['Reasoning', '200K ctx'],
-      inputPrice: '$2.70',
+      tags: ['READ/WRITE', '128K CTX'],
+      inputPrice: '$2.78',
       outputPrice: '$13.50',
-      inputNum: 2.70,
-      latency: 410,
+      inputNum: 2.78,
+      latency: 418,
       uptime: '99.9%',
       uptimeNum: 99.9,
-      usersBought: 1284,
+      usersBought: 1204,
     },
     {
-      id: 'gridai',
-      handle: '@gridai',
+      id: 'gpt4u',
+      handle: '@gpt4u',
       initials: 'GR',
       model: 'Claude 3.5 Sonnet',
       verified: true,
-      tags: ['Coding', '200K ctx'],
+      tags: ['CODING', '128K CTX'],
       inputPrice: '$2.85',
       outputPrice: '$14.20',
       inputNum: 2.85,
-      latency: 380,
+      latency: 39,
       uptime: '99.7%',
       uptimeNum: 99.7,
       usersBought: 962,
     },
     {
-      id: 'llamaworks',
-      handle: '@llamaworks',
+      id: 'tamarworks',
+      handle: '@tamarworks',
       initials: 'LW',
       model: 'Llama 3.3 70B',
       verified: true,
-      tags: ['Open Source', '128K ctx'],
-      inputPrice: '$0.38',
+      tags: ['OPEN SOURCE', '128K CTX'],
+      inputPrice: '$0.31',
       outputPrice: '$0.38',
-      inputNum: 0.38,
-      latency: 190,
-      uptime: '99.9%',
-      uptimeNum: 99.9,
-      usersBought: 2310,
+      inputNum: 0.31,
+      latency: 109,
+      uptime: '99.5%',
+      uptimeNum: 99.5,
+      usersBought: 2230,
     },
     {
       id: 'tokenforge',
@@ -76,43 +76,43 @@ export const PartnerMarketplace: React.FC = () => {
       initials: 'TF',
       model: 'DeepSeek R1',
       verified: true,
-      tags: ['Reasoning', '128K ctx'],
+      tags: ['REASONING', '128K CTX'],
       inputPrice: '$0.52',
-      outputPrice: '$2.05',
+      outputPrice: '$2.85',
       inputNum: 0.52,
-      latency: 340,
-      uptime: '99.5%',
-      uptimeNum: 99.5,
+      latency: 341,
+      uptime: '99.3%',
+      uptimeNum: 99.3,
       usersBought: 1740,
     },
     {
-      id: 'edgeinfer',
-      handle: '@edgeinfer',
+      id: 'gdelpinar',
+      handle: '@gdelpinar',
       initials: 'EI',
       model: 'Qwen 2.5 72B',
-      verified: false,
-      tags: ['Coding', '128K ctx'],
+      verified: true,
+      tags: ['CODING', '128K CTX'],
       inputPrice: '$0.30',
       outputPrice: '$0.36',
       inputNum: 0.30,
-      latency: 260,
-      uptime: '98.1%',
-      uptimeNum: 98.1,
+      latency: 208,
+      uptime: '99.7%',
+      uptimeNum: 99.7,
       usersBought: 86,
     },
     {
-      id: 'aurahost',
-      handle: '@aurahost',
+      id: 'guruhost',
+      handle: '@guruhost',
       initials: 'AH',
-      model: 'Mistral Large',
+      model: 'Mistral 7B',
       verified: true,
-      tags: ['Reasoning', '128K ctx'],
+      tags: ['REASONING', '128K CTX'],
       inputPrice: '$1.90',
       outputPrice: '$5.80',
       inputNum: 1.90,
-      latency: 280,
-      uptime: '99.6%',
-      uptimeNum: 99.6,
+      latency: 268,
+      uptime: '99.5%',
+      uptimeNum: 99.5,
       usersBought: 540,
     },
   ]
@@ -154,8 +154,46 @@ export const PartnerMarketplace: React.FC = () => {
 
   const comparedList = partners.filter((p) => selectedPartners.includes(p.handle))
 
+  // ponytail: compare numbers are fixed sample data per the reference design, not card data
+  type CompareRow = {
+    handle: string
+    price: number
+    priceLabel: string
+    latency: number
+    uptime: number
+    uptimeLabel: string
+    users: number
+  }
+
+  const compareSamples: Record<string, Omit<CompareRow, 'handle'>> = {
+    '@novacompute': { price: 2.7, priceLabel: '$2.70', latency: 41, uptime: 99.3, uptimeLabel: '99.3%', users: 1484 },
+    '@gpt4u': { price: 2.85, priceLabel: '$2.85', latency: 39, uptime: 99.7, uptimeLabel: '99.7%', users: 962 },
+  }
+
+  const sampleFor = (handle: string): Omit<CompareRow, 'handle'> => {
+    if (compareSamples[handle]) return compareSamples[handle]
+    const p = partners.find((x) => x.handle === handle)
+    return {
+      price: p?.inputNum ?? 0,
+      priceLabel: p?.inputPrice ?? '$0',
+      latency: p?.latency ?? 0,
+      uptime: p?.uptimeNum ?? 0,
+      uptimeLabel: p?.uptime ?? '0%',
+      users: p?.usersBought ?? 0,
+    }
+  }
+
+  const compareRows: CompareRow[] = comparedList.map((p) => ({ handle: p.handle, ...sampleFor(p.handle) }))
+
+  const compareMetrics: { label: string; get: (r: CompareRow) => number; fmt: (r: CompareRow) => string }[] = [
+    { label: 'PRICE (LOWER IS BETTER)', get: (r) => r.price, fmt: (r) => r.priceLabel },
+    { label: 'LATENCY', get: (r) => r.latency, fmt: (r) => `${r.latency}ms` },
+    { label: 'UPTIME', get: (r) => r.uptime, fmt: (r) => r.uptimeLabel },
+    { label: 'USERS BOUGHT', get: (r) => r.users, fmt: (r) => r.users.toLocaleString() },
+  ]
+
   return (
-    <div className="min-h-screen w-full bg-[#060808] text-[#F5F5F2] flex flex-col font-sans">
+    <div className="min-h-screen w-full bg-[#060808] text-[#F5F5F2] flex flex-col font-sans ocean-bg">
       <Navbar />
 
       <main className="max-w-[1240px] w-full mx-auto px-6 py-8 flex flex-col gap-8">
@@ -163,7 +201,7 @@ export const PartnerMarketplace: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex flex-col gap-1">
             <span className="font-mono text-xs uppercase tracking-widest text-[#98A0A8]">
-              03 · PARTNER MARKETPLACE
+              03 · PARTNER MARKETPLACE · ARBITRAGE & HIGH-THROUGHPUT NODES
             </span>
             <h1 className="text-4xl lg:text-5xl font-normal tracking-tight">
               Partner APIs. <span className="font-serif italic">Unique prices.</span>
@@ -322,70 +360,39 @@ export const PartnerMarketplace: React.FC = () => {
                 </button>
               </div>
 
-              <div className="flex items-center gap-4 text-xs font-mono">
-                {comparedList.map((p, idx) => (
-                  <div key={p.handle} className="flex items-center gap-1.5">
-                    <span className={`w-2 h-2 rounded-full ${idx === 0 ? 'bg-[#00E599]' : 'bg-[#FFFFFF]'}`} />
-                    <span className="text-[#F5F5F2]">{p.handle}</span>
-                  </div>
-                ))}
+              <div className="flex flex-col gap-3">
+                <span className="text-xs text-[#98A0A8]">Claude 3.5 Sonnet · normalized sample data</span>
+                <div className="flex flex-wrap items-center gap-4 text-[11px] font-mono text-[#98A0A8]">
+                  {compareRows.map((r, idx) => (
+                    <span key={r.handle} className="flex items-center gap-1.5">
+                      <span className={`w-2 h-2 rounded-full ${idx === 0 ? 'bg-[#00E599]' : 'bg-[#F5F5F2]'}`} />
+                      {r.handle}
+                    </span>
+                  ))}
+                </div>
               </div>
 
               {/* Comparison Bars */}
               <div className="flex flex-col gap-4 font-mono text-xs">
-                {/* Price Bar */}
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex justify-between text-[11px] text-[#98A0A8]">
-                    <span>PRICE (LOWER IS BETTER)</span>
-                  </div>
-                  {comparedList.map((p, idx) => (
-                    <div key={p.handle} className="flex items-center gap-2">
-                      <div className="flex-1 bg-[#121619] h-2 rounded-full overflow-hidden">
-                        <div
-                          style={{ width: `${Math.min(100, (p.inputNum / 3.0) * 100)}%` }}
-                          className={`h-full ${idx === 0 ? 'bg-[#00E599]' : 'bg-[#FFFFFF]'}`}
-                        />
-                      </div>
-                      <span className="text-[10px] w-10 text-right">{p.inputPrice}</span>
+                {compareMetrics.map((m) => {
+                  const max = Math.max(...compareRows.map(m.get), 1)
+                  return (
+                    <div key={m.label} className="flex flex-col gap-1.5">
+                      <span className="text-[10px] text-[#5A626A]">{m.label}</span>
+                      {compareRows.map((r, idx) => (
+                        <div key={r.handle} className="flex items-center gap-3">
+                          <div className="flex-1 h-1.5 rounded-full bg-[#121619] overflow-hidden">
+                            <div
+                              style={{ width: `${(m.get(r) / max) * 100}%` }}
+                              className={`h-full rounded-full ${idx === 0 ? 'bg-[#00E599]' : 'bg-[#F5F5F2]'}`}
+                            />
+                          </div>
+                          <span className="text-[10px] w-12 text-right text-[#98A0A8]">{m.fmt(r)}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-
-                {/* Latency Bar */}
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex justify-between text-[11px] text-[#98A0A8]">
-                    <span>LATENCY</span>
-                  </div>
-                  {comparedList.map((p, idx) => (
-                    <div key={p.handle} className="flex items-center gap-2">
-                      <div className="flex-1 bg-[#121619] h-2 rounded-full overflow-hidden">
-                        <div
-                          style={{ width: `${Math.min(100, (p.latency / 600) * 100)}%` }}
-                          className={`h-full ${idx === 0 ? 'bg-[#00E599]' : 'bg-[#FFFFFF]'}`}
-                        />
-                      </div>
-                      <span className="text-[10px] w-10 text-right">{p.latency}ms</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Uptime Bar */}
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex justify-between text-[11px] text-[#98A0A8]">
-                    <span>UPTIME</span>
-                  </div>
-                  {comparedList.map((p, idx) => (
-                    <div key={p.handle} className="flex items-center gap-2">
-                      <div className="flex-1 bg-[#121619] h-2 rounded-full overflow-hidden">
-                        <div
-                          style={{ width: `${p.uptimeNum}%` }}
-                          className={`h-full ${idx === 0 ? 'bg-[#00E599]' : 'bg-[#FFFFFF]'}`}
-                        />
-                      </div>
-                      <span className="text-[10px] w-10 text-right">{p.uptime}</span>
-                    </div>
-                  ))}
-                </div>
+                  )
+                })}
               </div>
 
               {/* Sell Card CTA */}
@@ -404,6 +411,23 @@ export const PartnerMarketplace: React.FC = () => {
             </div>
           )}
         </div>
+        <footer className="mt-8 flex flex-col md:flex-row md:justify-between gap-4 text-xs text-[#98A0A8] border-t border-[#22272B] pt-6">
+          <div className="flex items-center gap-4 flex-col md:flex-row">
+            <span className="font-mono text-[10px]">SHOWING 6 OF 18 PARTNER LISTINGS · SAMPLE DATA - NAMES AND PRICES ILLUSTRATIVE</span>
+          </div>
+          <div className="flex flex-col md:flex-row gap-4 text-xs">
+            <span>SWIMORE AI © 2026 Swimore Labs Inc. All rights reserved.</span>
+            <div className="flex items-center gap-4">
+              <a href="/documentation" className="hover:text-[#F5F5F2]">Documentation</a>
+              <a href="/privacy" className="hover:text-[#F5F5F2]">Privacy</a>
+              <a href="/terms" className="hover:text-[#F5F5F2]">Terms of Service</a>
+              <span className="flex items-center gap-1 text-[#00E599]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#00E599]" />
+                <span>All systems operational</span>
+              </span>
+            </div>
+          </div>
+        </footer>
       </main>
 
       {/* Partner Registration Modal with SeaBank Account */}

@@ -34,3 +34,10 @@ body {
   background: #333A40;
 }
 
+/* Ambient ocean background: rays visible at top, fading to the page base color */
+.ocean-bg {
+  background-image: linear-gradient(to bottom, rgba(6,8,8,0.2) 0%, #060808 100%), url('/ocean/Ocean-background.jpg');
+  background-size: cover;
+  background-position: top;
+}
+

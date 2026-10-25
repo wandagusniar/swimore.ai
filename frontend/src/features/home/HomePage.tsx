@@ -11,6 +11,7 @@ export const HomePage: React.FC = () => {
   const [modelDropdownOpen, setModelDropdownOpen] = useState(false)
   const [demoModalOpen, setDemoModalOpen] = useState(false)
   const [faqOpenIndex, setFaqOpenIndex] = useState(0)
+  const [apiTab, setApiTab] = useState<'structured' | 'streaming'>('streaming')
 
   const availableModels = [
     { id: 'swimore/auto-fast', name: 'swimore/auto-fast (Sub-second fallback)' },
@@ -74,7 +75,7 @@ export const HomePage: React.FC = () => {
   ]
 
   return (
-    <div className="min-h-screen w-full bg-[#060808] text-[#F5F5F2] flex flex-col font-sans selection:bg-[#00E599]/20 selection:text-[#00E599]">
+    <div className="min-h-screen w-full bg-[#060808] text-[#F5F5F2] flex flex-col font-sans ocean-bg selection:bg-[#00E599]/20 selection:text-[#00E599]">
       {/* Exact Floating Navbar */}
       <Navbar />
 
@@ -233,7 +234,7 @@ export const HomePage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#00E599]" />
                 <span className="font-mono text-xs uppercase tracking-widest text-[#98A0A8]">
-                  MULTI-PROVIDER AI CHAT · API GATEWAY · API MARKETPLACE
+                  INTRODUCING AI · API GATEWAY · API MARKETPLACE
                 </span>
               </div>
 
@@ -265,115 +266,78 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Column: Exact Live Routing Diagram */}
-            <div className="lg:col-span-6 rounded-2xl border border-[#22272B] bg-[#0A0C0E] p-6 flex flex-col gap-4 shadow-xl">
-              <div className="flex items-center justify-between pb-3 border-b border-[#22272B]/60 text-xs font-mono">
-                <div className="flex items-center gap-2 text-[#00E599]">
-                  <span className="w-2 h-2 rounded-full bg-[#00E599] animate-pulse" />
-                  <span>LIVE ROUTING TRACE</span>
-                </div>
-                <span className="text-[#98A0A8]">SAMPLE</span>
+            {/* Right Column: API Example Panel */}
+            <div className="lg:col-span-6 rounded-2xl border border-[#22272B] bg-[#0A0C0E] p-5 flex flex-col gap-4 shadow-xl">
+              {/* Structured / Streaming Tabs */}
+              <div className="flex items-center gap-1 p-1 rounded-full bg-[#121619] border border-[#22272B] w-fit">
+                {(['structured', 'streaming'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setApiTab(tab)}
+                    className={`px-4 py-1.5 rounded-full text-xs font-mono capitalize transition-colors ${
+                      apiTab === tab
+                        ? 'bg-[#1E2328] text-[#00E599]'
+                        : 'text-[#98A0A8] hover:text-[#F5F5F2]'
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
               </div>
 
-              {/* Diagram Flow */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 text-xs">
-                {/* Input & Policy Box */}
-                <div className="md:col-span-4 flex flex-col gap-3">
-                  <div className="p-3 rounded-xl border border-[#22272B] bg-[#0E1215]">
-                    <span className="font-mono text-[10px] text-[#98A0A8] uppercase block mb-1">INPUT</span>
-                    <span className="font-medium text-[#F5F5F2]">User Request</span>
-                  </div>
-
-                  <div className="p-3 rounded-xl border border-[#22272B] bg-[#0E1215]">
-                    <span className="font-mono text-[10px] text-[#98A0A8] uppercase block mb-1">POLICY</span>
-                    <span className="font-medium text-[#F5F5F2] block">SWIMORE Router</span>
-                    <span className="text-[11px] text-[#98A0A8]">latency · price</span>
-                  </div>
-                </div>
-
-                {/* Path A & Path B */}
-                <div className="md:col-span-8 flex flex-col gap-3">
-                  {/* Path A */}
-                  <div className="p-3.5 rounded-xl border border-[#22272B] bg-[#0E1215]/80 flex flex-col gap-2">
-                    <div className="flex items-center justify-between text-[11px] font-mono text-[#00E599]">
-                      <span>PATH A · DIRECT PROVIDERS</span>
-                      <span className="text-[#98A0A8]">Response 200 OK</span>
+              {/* API Example Card */}
+              <div className="rounded-xl border border-[#22272B] bg-[#0E1215] overflow-hidden">
+                <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-[#22272B]">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5">
+                      <span className="px-2 py-0.5 rounded-full border border-[#22272B] text-[10px] font-mono text-[#5A626A]">
+                        GET
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-[#00E599]/15 border border-[#00E599]/40 text-[10px] font-mono text-[#00E599]">
+                        POST
+                      </span>
                     </div>
-
-                    <div className="grid grid-cols-3 gap-1.5 font-mono text-[10px]">
-                      <div className="p-1.5 rounded bg-[#121619] border border-[#22272B] flex justify-between">
-                        <span className="text-[#98A0A8]">OpenAI</span>
-                        <span className="text-[#F5F5F2]">32ms</span>
-                      </div>
-                      <div className="p-1.5 rounded bg-[#121619] border border-[#22272B] flex justify-between">
-                        <span className="text-[#98A0A8]">Anthropic</span>
-                        <span className="text-[#F5F5F2]">31ms</span>
-                      </div>
-                      <div className="p-1.5 rounded bg-[#121619] border border-[#00E599]/40 flex justify-between text-[#00E599]">
-                        <span>DeepSeek</span>
-                        <span>28ms</span>
-                      </div>
-                      <div className="p-1.5 rounded bg-[#121619] border border-[#22272B] flex justify-between">
-                        <span className="text-[#98A0A8]">ZAI</span>
-                        <span className="text-[#F5F5F2]">34ms</span>
-                      </div>
-                      <div className="p-1.5 rounded bg-[#121619] border border-[#22272B] flex justify-between">
-                        <span className="text-[#98A0A8]">GLM</span>
-                        <span className="text-[#F5F5F2]">36ms</span>
-                      </div>
-                      <div className="p-1.5 rounded bg-[#121619] border border-[#22272B] flex justify-between text-[#98A0A8]">
-                        <span>Other...</span>
-                        <span>-</span>
-                      </div>
-                    </div>
+                    <span className="font-mono text-xs text-[#F5F5F2]">/chat/completions</span>
                   </div>
-
-                  {/* Path B */}
-                  <div className="p-3.5 rounded-xl border border-[#22272B] bg-[#0E1215]/80 flex flex-col gap-2">
-                    <div className="flex items-center justify-between text-[11px] font-mono text-[#E0A458]">
-                      <span>PATH B · PARTNERS · UNIQUE PRICE</span>
-                      <span className="text-[#98A0A8]">Response 200 OK</span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 text-[11px]">
-                      <div className="p-2 rounded bg-[#121619] border border-[#22272B] flex flex-col gap-1">
-                        <div className="flex justify-between font-mono text-[10px]">
-                          <span className="text-[#E0A458]">Partner A</span>
-                          <span className="text-[#98A0A8]">$0.38/M</span>
-                        </div>
-                        <span className="font-medium text-[#F5F5F2]">Llama 3.3 70B</span>
-                      </div>
-
-                      <div className="p-2 rounded bg-[#121619] border border-[#22272B] flex flex-col gap-1">
-                        <div className="flex justify-between font-mono text-[10px]">
-                          <span className="text-[#E0A458]">Partner B</span>
-                          <span className="text-[#98A0A8]">$0.52/M</span>
-                        </div>
-                        <span className="font-medium text-[#F5F5F2]">Qwen 2.5 72B</span>
-                      </div>
-                    </div>
-                  </div>
+                  <span className="py-1 px-3 rounded-full bg-[#121619] border border-[#22272B] text-[11px] font-mono text-[#F5F5F2] flex items-center gap-1.5 whitespace-nowrap">
+                    swimore/auto-fast
+                    <ChevronDown className="w-3 h-3 text-[#98A0A8]" />
+                  </span>
                 </div>
-                {/* Footer row at card level */}
-                <div className="flex items-center justify-between pt-2 border-t border-[#22272B]/60 text-xs font-mono">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#00E599]" />
-                    <span className="text-[#98A0A8]">Direct route selected</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#98A0A8]" />
-                    <span className="text-[#98A0A8]">Zero failover drop</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#00E599]" />
-                    <span className="text-[#00E599]">Status 200 OK</span>
-                  </div>
-                </div>
-                <div className="flex justify-between mt-2 text-xs font-mono text-[#98A0A8]">
-                  <div>Telemetry: 16-sample rolling window</div>
-                  <div>P99: 44ms · Loss: 0.00%</div>
-                </div>
+                <pre className="px-4 py-4 font-mono text-xs leading-relaxed text-[#98A0A8] overflow-x-auto">
+{`{
+  "model": "swimore/auto-fast",
+  "messages": [{ "role": "user", "content": "Hello" }]
+}`}
+                </pre>
               </div>
+
+              {/* Mini Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Link
+                  to="/chat"
+                  className="rounded-xl border border-[#22272B] bg-[#0E1215] p-4 flex flex-col gap-1.5 hover:border-[#333A40] transition-colors"
+                >
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-[#00E599]">EXPLORE AI API</span>
+                  <span className="text-sm text-[#F5F5F2]">One key, 200+ models through a single gateway.</span>
+                </Link>
+                <Link
+                  to="/marketplace"
+                  className="rounded-xl border border-[#22272B] bg-[#0E1215] p-4 flex flex-col gap-1.5 hover:border-[#333A40] transition-colors"
+                >
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-[#E5A93C]">EXPLORE AI PROVIDER</span>
+                  <span className="text-sm text-[#F5F5F2]">Sell API access and unique pricing on the marketplace.</span>
+                </Link>
+              </div>
+
+              {/* Create API Key */}
+              <Link
+                to="/dashboard/keys"
+                className="self-start px-5 py-2 rounded-full bg-[#00E599] hover:bg-[#00E599]/90 text-[#060808] text-xs font-mono uppercase tracking-widest transition-colors"
+              >
+                Create API Key
+              </Link>
             </div>
           </div>
         </section>
@@ -722,24 +686,21 @@ export const HomePage: React.FC = () => {
         </section>
 
         {/* Footer */}
-        <footer className="w-full border-t border-[#22272B]/40 pt-8 pb-12">
-          <div className="max-w-[1240px] mx-auto px-6 flex justify-between items-center">
-            <div className="text-xs font-mono uppercase tracking-widest text-[#98A0A8]">
-              SWIMORE AI · ALL FIGURES ARE SAMPLE DATA
-            </div>
-            <div className="flex gap-6">
-              <Link to="/models" className="text-xs text-[#98A0A8] hover:text-[#F5F5F2]">
-                Models →
-              </Link>
-              <Link to="/marketplace" className="text-xs text-[#98A0A8] hover:text-[#F5F5F2]">
-                Marketplace Partner →
-              </Link>
-              <Link to="/pricing" className="text-xs text-[#98A0A8] hover:text-[#F5F5F2]">
-                Pricing →
-              </Link>
-              <Link to="/docs" className="text-xs text-[#98A0A8] hover:text-[#F5F5F2]">
-                Docs →
-              </Link>
+        <footer className="w-full border-t border-[#22272B]/40 py-6">
+          <div className="max-w-[1240px] w-full flex flex-col md:flex-row md:items-center justify-between gap-3 text-[11px] font-mono">
+            <span className="text-[#5A626A]">SWIMORE AI © 2026 Swimore Labs Inc. All rights reserved.</span>
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-4">
+                <Link to="/docs" className="text-[#98A0A8] hover:text-[#F5F5F2]">
+                  Documentation
+                </Link>
+                <a href="#" className="text-[#98A0A8] hover:text-[#F5F5F2]">Privacy</a>
+                <a href="#" className="text-[#98A0A8] hover:text-[#F5F5F2]">Terms of Service</a>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#00E599]" />
+                <span className="text-[#00E599] font-medium">All systems operational</span>
+              </div>
             </div>
           </div>
         </footer>

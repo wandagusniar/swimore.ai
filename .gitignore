@@ -42,3 +42,4 @@ docs/
 scratch/
 ui-ux/
 guides.md
+.playwright-mcp/

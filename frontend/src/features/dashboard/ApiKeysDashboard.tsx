@@ -5,16 +5,20 @@ import { Plus, Search, ChevronDown, Copy, Check, RefreshCw } from 'lucide-react'
 export const ApiKeysDashboard: React.FC = () => {
   const [timeframe, setTimeframe] = useState<'day' | 'week' | 'month' | 'year'>('day')
   const [createModalOpen, setCreateModalOpen] = useState(false)
-  const [keyName, setKeyName] = useState('')
+  const [keyName, setKeyName] = useState('prod backend')
   const [newKey, setNewKey] = useState<string | null>(null)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
+  const [group, setGroup] = useState<'Free' | 'Swimore Plus'>('Swimore Plus')
+  const [category, setCategory] = useState<'verified' | 'partner'>('verified')
+  const [selectedProvider, setSelectedProvider] = useState<string>('Anthropic')
+  const [curlCopied, setCurlCopied] = useState(false)
   const [latencyTest, setLatencyTest] = useState<number>(214)
   const [isPinging, setIsPinging] = useState(false)
 
   const [keysList, setKeysList] = useState([
     {
       id: 'k1',
-      name: 'prod-backend',
+      name: 'prod backend',
       rawKey: 'sk-sw-prod-882910-49iq',
       masked: 'sk-sw-••••49iq',
       tokens: '1.28M',
@@ -93,8 +97,16 @@ export const ApiKeysDashboard: React.FC = () => {
     }
   }
 
+  const curlCode = `curl https://api.swimore.ai/v1/chat/completions \\
+  -H "Authorization: Bearer sk-sw-•••••••49tq" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "claude-3.5-sonnet",
+    "messages": [{"role":"user","content":"Hello"}]
+  }'`
+
   return (
-    <div className="min-h-screen w-full bg-[#060808] text-[#F5F5F2] flex flex-col font-sans">
+    <div className="min-h-screen w-full bg-[#060808] text-[#F5F5F2] flex flex-col font-sans ocean-bg">
       <Navbar />
 
       <main className="max-w-[1240px] w-full mx-auto px-6 py-8 flex flex-col gap-8">
@@ -371,17 +383,22 @@ export const ApiKeysDashboard: React.FC = () => {
 
       {/* Create Key Modal */}
       {createModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 font-mono">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 font-sans">
           <form
             onSubmit={handleCreateKey}
-            className="max-w-md w-full rounded-2xl bg-[#0A0C0E] border border-[#22272B] p-6 flex flex-col gap-4 shadow-2xl text-xs"
+            className="max-w-2xl w-full rounded-2xl bg-[#0A0C0E] border border-[#22272B] p-7 shadow-2xl"
           >
-            <div className="flex items-center justify-between pb-3 border-b border-[#22272B]">
-              <span className="font-semibold text-[#F5F5F2]">CREATE NEW API KEY</span>
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-[#F5F5F2]">Create API Key</h2>
+                <p className="text-xs text-[#98A0A8] mt-1.5">
+                  Name it, pick a group and where the access comes from.
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setCreateModalOpen(false)}
-                className="text-[#98A0A8] hover:text-[#F5F5F2]"
+                className="text-[#98A0A8] hover:text-[#F5F5F2] mt-1"
               >
                 ✕
               </button>
@@ -410,38 +427,240 @@ export const ApiKeysDashboard: React.FC = () => {
               </div>
             ) : (
               <>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[#98A0A8]">Key Name</label>
+                {/* NAME */}
+                <div className="flex flex-col gap-1.5 mb-4">
+                  <label className="font-mono uppercase tracking-widest text-[10px] text-[#5A626A]">
+                    NAME
+                  </label>
                   <input
                     type="text"
                     required
                     value={keyName}
                     onChange={(e) => setKeyName(e.target.value)}
-                    placeholder="e.g. Production Ingress Gateway"
-                    className="p-2.5 rounded-lg bg-[#0E1215] border border-[#22272B] text-[#F5F5F2] focus:outline-none focus:border-[#333A40]"
+                    className="rounded-lg bg-[#0E1215] border border-[#22272B] p-2.5 text-xs text-[#F5F5F2] focus:outline-none focus:border-[#00E599]"
                   />
                 </div>
 
-                <div className="flex justify-end gap-3 pt-2">
+                {/* GROUP */}
+                <div className="flex flex-col gap-1.5 mb-4">
+                  <label className="font-mono uppercase tracking-widest text-[10px] text-[#5A626A]">
+                    GROUP
+                  </label>
+                  <div className="inline-flex items-center rounded-full border border-[#22272B] bg-[#0E1215] p-1">
+                    {(['Free', 'Swimore Plus'] as const).map((g) => (
+                      <button
+                        key={g}
+                        type="button"
+                        onClick={() => setGroup(g)}
+                        className={`px-4 py-1.5 rounded-full text-xs font-mono transition-all ${
+                          group === g
+                            ? 'bg-[#F5F5F2] text-[#060808]'
+                            : 'text-[#98A0A8] hover:text-[#F5F5F2]'
+                        }`}
+                      >
+                        {g}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* CATEGORY */}
+                <div className="flex flex-col gap-1.5 mb-4">
+                  <label className="font-mono uppercase tracking-widest text-[10px] text-[#5A626A]">
+                    CATEGORY
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setCategory('verified')}
+                      className={`rounded-xl border p-3 flex flex-col gap-2 transition-all ${
+                        category === 'verified'
+                          ? 'border-[#A855F7]/70 bg-[#0E1215]'
+                          : 'border-[#22272B] bg-[#0E1215] hover:border-[#333A40]'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-xs font-bold text-[#F5F5F2]">Verified purchase</span>
+                          <span className="text-xs text-[#98A0A8]">Direct from provider</span>
+                        </div>
+                        <div className={`flex h-4 w-4 items-center justify-center rounded-full transition-all ${
+                          category === 'verified' ? 'bg-[#A855F7]' : 'bg-[#333A40]'
+                        }`}>
+                          {category === 'verified' && <div className="h-1.5 w-1.5 rounded-full bg-[#0A0C0E]" />}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5 mt-1">
+                        <span className="font-mono uppercase tracking-widest text-[10px] text-[#5A626A]">
+                          TRACKED PROVIDERS
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {['Anthropic', 'Gemini', 'OpenAI'].map((p) => (
+                            <button
+                              key={p}
+                              type="button"
+                              onClick={() => setSelectedProvider(p)}
+                              className={`rounded-md border px-2.5 py-1 text-[10px] font-mono transition-all ${
+                                selectedProvider === p
+                                  ? 'border-[#333A40] bg-[#121619] text-[#F5F5F2]'
+                                  : 'border-[#22272B] bg-[#121619] text-[#98A0A8] hover:text-[#F5F5F2]'
+                              }`}
+                            >
+                              {p}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setCategory('partner')}
+                      className={`rounded-xl border p-3 flex flex-col gap-2 transition-all ${
+                        category === 'partner'
+                          ? 'border-[#A855F7]/70 bg-[#0E1215]'
+                          : 'border-[#22272B] bg-[#0E1215] hover:border-[#333A40]'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-xs font-bold text-[#F5F5F2]">Partner</span>
+                          <span className="text-xs text-[#98A0A8]">Bought from a partner</span>
+                        </div>
+                        <div className={`flex h-4 w-4 items-center justify-center rounded-full transition-all ${
+                          category === 'partner' ? 'bg-[#A855F7]' : 'bg-[#333A40]'
+                        }`}>
+                          {category === 'partner' && <div className="h-1.5 w-1.5 rounded-full bg-[#0A0C0E]" />}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5 mt-1">
+                        <span className="font-mono uppercase tracking-widest text-[10px] text-[#5A626A]">
+                          PARTNER USERNAME
+                        </span>
+                        <div className="flex items-center justify-between rounded-lg border border-[#22272B] bg-[#0A0C0E] px-3 py-2">
+                          <span className="text-[11px] font-mono text-[#98A0A8]">@novacompute</span>
+                          <span className="flex items-center gap-1 text-[10px] font-mono text-[#00E599]">
+                            <Check className="w-3 h-3" /> verified <ChevronDown className="w-3 h-3" />
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* ENDPOINT */}
+                <div className="flex items-end justify-between gap-3 mb-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="font-mono uppercase tracking-widest text-[10px] text-[#5A626A]">
+                      ENDPOINT
+                    </label>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => setCreateModalOpen(false)}
-                    className="px-4 py-2 rounded-full border border-[#22272B] text-[#98A0A8]"
+                    className="rounded-full border border-[#22272B] px-3 py-1.5 flex items-center gap-2 text-xs font-mono text-[#98A0A8]"
                   >
-                    Cancel
+                    claude-3.5-sonnet <ChevronDown className="w-3 h-3" />
                   </button>
-                  <button
-                    type="submit"
-                    className="px-5 py-2 rounded-full bg-[#F5F5F2] text-[#060808] font-medium hover:bg-white"
-                  >
-                    Generate Key
-                  </button>
+                </div>
+
+                {/* CURL + RESPONSE */}
+                <div className="rounded-xl bg-[#0E1215] border border-[#22272B] overflow-hidden mb-6">
+                  <div className="flex items-center justify-between px-4 py-2.5">
+                    <span className="font-mono uppercase tracking-widest text-[10px] text-[#5A626A]">
+                      CURL
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleCopy(curlCode, 'curl')
+                        setCurlCopied(true)
+                        setTimeout(() => setCurlCopied(false), 2000)
+                      }}
+                      className="flex items-center gap-1.5 text-[10px] font-mono tracking-widest text-[#98A0A8] hover:text-[#F5F5F2] transition-colors"
+                    >
+                      {curlCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />} COPY
+                    </button>
+                  </div>
+                  <pre className="px-4 pb-4 font-mono text-[11px] leading-relaxed whitespace-pre text-[#5A626A] overflow-x-auto">
+                    <span className="text-[#00E599]">curl</span>{' '}
+                    <span className="text-[#F5F5F2]">https://api.swimore.ai/v1/chat/completions</span> {'\\'}
+                    {'\n  -H '}
+                    <span className="text-[#E5A93C]">"Authorization: Bearer sk-sw-•••••••49tq"</span> {'\\'}
+                    {'\n  -H '}
+                    <span className="text-[#E5A93C]">"Content-Type: application/json"</span> {'\\'}
+                    {'\n  -d '}
+                    <span className="text-[#E5A93C]">{"'{"}</span>
+                    {'\n    '}
+                    <span className="text-[#E5A93C]">"model"</span>: <span className="text-[#F5F5F2]">"claude-3.5-sonnet"</span>,
+                    {'\n    '}
+                    <span className="text-[#E5A93C]">"messages"</span>: [{'{'}"role":"user","content": <span className="text-[#E5A93C]">"Hello"</span>{'}'}]
+                    {'\n  }'}
+                  </pre>
+                  <div className="border-t border-[#161B1E] px-4 py-3 flex flex-col gap-2">
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono uppercase tracking-widest text-[10px] text-[#5A626A]">
+                        RESPONSE
+                      </span>
+                      <span className="flex items-center gap-1.5 rounded bg-[#00E599]/10 border border-[#00E599]/30 px-2 py-0.5 text-[10px] font-mono text-[#00E599]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#00E599]" /> 200 OK
+                      </span>
+                    </div>
+                    <p className="font-mono text-[11px] text-[#5A626A] break-all">
+                      {'{'}
+                      <span className="text-[#E5A93C]">"id"</span>: <span className="text-[#00E599]">"chatcmpl-9x2..."</span>,{' '}
+                      <span className="text-[#E5A93C]">"choices"</span>: [{'{'}
+                      <span className="text-[#E5A93C]">"message"</span>: {'{'}
+                      <span className="text-[#E5A93C]">"content"</span>: <span className="text-[#E5A93C]">"Hi! How can I help you?"</span>
+                      {'}}]'},
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-4 pt-4 border-t border-[#22272B]">
+                  <span className="text-[11px] italic text-[#5A626A]">Key is shown once after creation.</span>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setCreateModalOpen(false)}
+                      className="rounded-full border border-[#22272B] px-4 py-1.5 text-xs font-mono text-[#98A0A8] hover:text-[#F5F5F2] transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="rounded-full bg-[#F5F5F2] px-5 py-1.5 text-xs font-mono font-bold text-[#060808] hover:bg-white transition-colors"
+                    >
+                      Create API Key
+                    </button>
+                  </div>
                 </div>
               </>
             )}
           </form>
         </div>
       )}
+
+      {/* Footer */}
+      <footer className="w-full border-t border-[#22272B]/40 py-6 px-6 mt-auto">
+        <div className="max-w-[1240px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3 text-[11px] font-mono">
+          <span className="text-[#5A626A]">SWIMORE AI © 2026 Swimore Labs Inc. All rights reserved.</span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5">
+              <a href="#" className="text-[#98A0A8] hover:text-[#F5F5F2]">
+                Documentation
+              </a>
+              <a href="#" className="text-[#98A0A8] hover:text-[#F5F5F2]">Privacy</a>
+              <a href="#" className="text-[#98A0A8] hover:text-[#F5F5F2]">Terms of Service</a>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00E599]" />
+              <span className="text-[#00E599] font-medium">All systems operational</span>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

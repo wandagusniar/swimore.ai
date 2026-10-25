@@ -115,7 +115,7 @@ export const ModelsCatalog: React.FC = () => {
   })
 
   return (
-    <div className="min-h-screen w-full bg-[#060808] text-[#F5F5F2] flex flex-col font-sans">
+    <div className="min-h-screen w-full bg-[#060808] text-[#F5F5F2] flex flex-col font-sans ocean-bg">
       <Navbar />
 
       <main className="max-w-[1240px] w-full mx-auto px-6 py-8 flex flex-col gap-8">
