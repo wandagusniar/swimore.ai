@@ -125,7 +125,7 @@ export const ModelsCatalog: React.FC = () => {
             <span className="font-mono text-xs uppercase tracking-widest text-[#98A0A8]">
               {activeTab === 'ranking' ? '02 · MODEL RANKING' : '02 · MODEL LIST'}
             </span>
-            <h1 className="text-4xl lg:text-5xl font-normal tracking-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-normal tracking-tight">
               {activeTab === 'ranking' ? (
                 <>
                   Model <span className="font-serif italic font-normal">Ranking</span>
@@ -203,7 +203,7 @@ export const ModelsCatalog: React.FC = () => {
             </div>
 
             {/* Dropdown Filters & Count */}
-            <div className="flex items-center justify-between pt-2 text-xs text-[#98A0A8]">
+            <div className="flex flex-wrap items-center justify-between gap-y-2 pt-2 text-xs text-[#98A0A8]">
               <div className="flex items-center gap-3">
                 <button className="py-1 px-3 rounded-lg border border-[#22272B] bg-[#0A0C0E] flex items-center gap-2">
                   <span>Category: All</span> <ChevronDown className="w-3 h-3" />
@@ -252,7 +252,7 @@ export const ModelsCatalog: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-8 text-xs font-mono">
+                  <div className="flex flex-wrap items-center gap-8 text-xs font-mono">
                     <div className="flex flex-col">
                       <span className="text-[10px] text-[#5A626A]">PER 1M TOKENS</span>
                       <span className="text-[#F5F5F2] font-semibold">{m.price}</span>

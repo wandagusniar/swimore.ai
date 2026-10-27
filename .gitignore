@@ -40,6 +40,8 @@ Thumbs.db
 # Architecture, Internal PRDs & Sensitive Planning Documents
 docs/
 scratch/
-ui-ux/
-guides.md
+ui-ux/ 
+.playwright-mcp-old/
+# guides.md
 .playwright-mcp/
+session_opencode/

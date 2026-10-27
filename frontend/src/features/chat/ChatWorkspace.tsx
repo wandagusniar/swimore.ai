@@ -13,6 +13,7 @@ import {
   Copy,
   AlertTriangle,
   X,
+  Menu,
 } from 'lucide-react'
 import { useChatStore } from '@/store/chat-store'
 import { useSessionStore } from '@/store/session-store'
@@ -41,6 +42,7 @@ export const ChatWorkspace: React.FC = () => {
   const [inputText, setInputText] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [incidentReported, setIncidentReported] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -131,7 +133,18 @@ export const ChatWorkspace: React.FC = () => {
       {/* ======================================================== */}
       {/* EXACT FIGMA LEFT SIDEBAR                                 */}
       {/* ======================================================== */}
-      <aside className="w-[260px] h-full bg-[#0A0C0E] border-r border-[#22272B] flex flex-col justify-between p-3.5 flex-shrink-0 z-20">
+      {/* Mobile drawer backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 md:z-20 w-[260px] h-full bg-[#0A0C0E] border-r border-[#22272B] flex flex-col justify-between p-3.5 flex-shrink-0 transition-transform ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:static md:translate-x-0 md:flex`}
+      >
         <div className="flex flex-col gap-3">
           {/* Top Brand & Collapse */}
           <div className="flex items-center justify-between pb-1">
@@ -158,18 +171,21 @@ export const ChatWorkspace: React.FC = () => {
           <div className="flex flex-col gap-0.5 text-xs text-[#98A0A8]">
             <Link
               to="/models"
+              onClick={() => setSidebarOpen(false)}
               className="px-3 py-1.5 rounded-lg hover:bg-[#121619] hover:text-[#F5F5F2] transition-colors"
             >
               Models
             </Link>
             <Link
               to="/dashboard/keys"
+              onClick={() => setSidebarOpen(false)}
               className="px-3 py-1.5 rounded-lg hover:bg-[#121619] hover:text-[#F5F5F2] transition-colors"
             >
               API
             </Link>
             <Link
               to="/docs"
+              onClick={() => setSidebarOpen(false)}
               className="px-3 py-1.5 rounded-lg hover:bg-[#121619] hover:text-[#F5F5F2] transition-colors"
             >
               Docs
@@ -288,6 +304,13 @@ export const ChatWorkspace: React.FC = () => {
         {/* Top Header Bar */}
         <header className="h-14 px-6 border-b border-[#22272B]/60 flex items-center justify-between flex-shrink-0 bg-[#060808]/90 backdrop-blur z-20">
           <div className="flex items-center gap-2 text-sm">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="md:hidden p-1.5 -ml-1.5 rounded-lg text-[#98A0A8] hover:text-[#F5F5F2] hover:bg-[#121619] transition-colors"
+              aria-label="Toggle chat sidebar"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
             {isPrivateMode ? (
               <span className="font-medium text-[#F5F5F2] flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5 text-[#E0A458]" /> Private chat
@@ -562,7 +585,7 @@ export const ChatWorkspace: React.FC = () => {
             </div>
 
             {/* Bottom row inside input card */}
-            <div className="flex items-center justify-between pt-3 border-t border-[#161B1E] mt-2">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#161B1E] mt-2">
               {/* Left pills: Model Picker, Effort, Search, Research */}
               <div className="flex items-center gap-2">
                 <div className="relative">

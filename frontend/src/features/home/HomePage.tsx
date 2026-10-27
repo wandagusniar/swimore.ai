@@ -238,7 +238,7 @@ export const HomePage: React.FC = () => {
                 </span>
               </div>
 
-              <h1 className="text-6xl lg:text-7xl font-normal leading-[1.05] tracking-tight">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-normal leading-[1.05] tracking-tight">
                 Intelligence,<br />
                 <span className="font-serif italic font-normal text-[#F5F5F2]">
                   Routed Seamlessly.
@@ -288,7 +288,7 @@ export const HomePage: React.FC = () => {
 
               {/* API Example Card */}
               <div className="rounded-xl border border-[#22272B] bg-[#0E1215] overflow-hidden">
-                <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-[#22272B]">
+                <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-[#22272B]">
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1.5">
                       <span className="px-2 py-0.5 rounded-full border border-[#22272B] text-[10px] font-mono text-[#5A626A]">
@@ -344,7 +344,7 @@ export const HomePage: React.FC = () => {
 
         {/* Stats Band */}
         <section className="w-full max-w-[1240px] py-12 mb-12">
-          <div className="flex flex-col sm:flex-row gap-6">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-6">
             <div className="flex flex-col gap-2 rounded-2xl border border-[#22272B] bg-[#0A0C0E] p-6">
               <div className="text-5xl font-semibold text-[#F5F5F2]">12ms</div>
               <div className="text-sm text-[#98A0A8] font-mono uppercase tracking-widest">Avg latency</div>

@@ -114,7 +114,7 @@ export const ModelDetails: React.FC = () => {
             <div className="flex flex-col">
               <span className="text-[11px] font-mono text-[#98A0A8]">Models / Anthropic</span>
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl lg:text-4xl font-normal tracking-tight">
+                <h1 className="text-2xl lg:text-4xl font-normal tracking-tight">
                   claude-3.5-<span className="font-serif italic">sonnet</span>
                 </h1>
               </div>

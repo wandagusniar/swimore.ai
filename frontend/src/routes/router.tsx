@@ -38,6 +38,10 @@ export const router = createBrowserRouter([
     element: <DocumentationView />,
   },
   {
+    path: '/docs/:slug*',
+    element: <DocumentationView />,
+  },
+  {
     path: '/dashboard/keys',
     element: <ApiKeysDashboard />,
   },
@@ -46,4 +50,3 @@ export const router = createBrowserRouter([
     element: <HomePage />,
   },
 ])
-
