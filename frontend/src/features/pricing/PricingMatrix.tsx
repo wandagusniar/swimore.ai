@@ -2,9 +2,12 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Navbar } from '@/components/navigation/Navbar'
 import { Check, QrCode } from 'lucide-react'
+import { billingService } from '@/services/billing-service'
+import { useSessionStore } from '@/store/session-store'
 
 export const PricingMatrix: React.FC = () => {
   const navigate = useNavigate()
+  const { setPlan } = useSessionStore()
   const [tokenVolumeM, setTokenVolumeM] = useState(50)
   const [qrisModalOpen, setQrisModalOpen] = useState(false)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
@@ -14,17 +17,14 @@ export const PricingMatrix: React.FC = () => {
 
   const handleSimulatePayment = async () => {
     try {
-      const res = await fetch('/api/v1/billing/webhook', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          order_id: `SW-SUB-${Date.now()}`,
-          gross_amount: 150000,
-          payment_type: 'qris',
-          transaction_status: 'settlement',
-        }),
+      const res = await billingService.processWebhook({
+        order_id: `SW-SUB-${Date.now()}`,
+        gross_amount: 150000,
+        payment_type: 'qris',
+        transaction_status: 'settlement',
       })
-      if (res.ok) {
+      if (res.status === 'PROCESSED') {
+        setPlan('Swimore Plus')
         setPaymentSuccess(true)
         setTimeout(() => {
           setPaymentSuccess(false)

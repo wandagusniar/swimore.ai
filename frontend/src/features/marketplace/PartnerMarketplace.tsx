@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Navbar } from '@/components/navigation/Navbar'
 import { Search, ChevronDown, Check, X, ArrowRight } from 'lucide-react'
+import { partnerService } from '@/services/partner-service'
 
 export const PartnerMarketplace: React.FC = () => {
   const [selectedPartners, setSelectedPartners] = useState<string[]>(['@novacompute', '@gpt4u'])
@@ -24,7 +25,7 @@ export const PartnerMarketplace: React.FC = () => {
     'Free tier',
   ]
 
-  const partners = [
+  const [partners, setPartners] = useState([
     {
       id: 'novacompute',
       handle: '@novacompute',
@@ -115,7 +116,31 @@ export const PartnerMarketplace: React.FC = () => {
       uptimeNum: 99.5,
       usersBought: 540,
     },
-  ]
+  ])
+
+  useEffect(() => {
+    partnerService
+      .listEndpoints()
+      .then((endpoints) => {
+        if (endpoints.length > 0) {
+          setPartners((prev) =>
+            prev.map((p) => {
+              const match = endpoints.find((e) => e.handle === p.handle)
+              if (!match) return p
+              return {
+                ...p,
+                latency: match.latency_ms,
+                uptime: match.uptime,
+                uptimeNum: parseFloat(match.uptime) || p.uptimeNum,
+              }
+            })
+          )
+        }
+      })
+      .catch(() => {
+        // Retain fallback partner cards
+      })
+  }, [])
 
   const toggleSelectPartner = (handle: string) => {
     if (selectedPartners.includes(handle)) {
@@ -128,25 +153,19 @@ export const PartnerMarketplace: React.FC = () => {
   const handleRegisterPartner = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const res = await fetch('/api/v1/partner/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          handle: registerHandle,
-          model: registerModel,
-          endpoint_type: registerType,
-          input_price_1m: 0.75,
-          output_price_1m: 2.25,
-          seabank_account: registerSeaBank,
-        }),
+      await partnerService.registerPartner({
+        handle: registerHandle,
+        model: registerModel,
+        endpoint_type: registerType,
+        input_price_1m: 0.75,
+        output_price_1m: 2.25,
+        seabank_account: registerSeaBank,
       })
-      if (res.ok) {
-        setRegisterSuccess(true)
-        setTimeout(() => {
-          setRegisterSuccess(false)
-          setRegisterModalOpen(false)
-        }, 2000)
-      }
+      setRegisterSuccess(true)
+      setTimeout(() => {
+        setRegisterSuccess(false)
+        setRegisterModalOpen(false)
+      }, 2000)
     } catch {
       // error
     }

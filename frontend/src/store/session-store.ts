@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { authService } from '@/services/auth-service'
 
 export type PlanTier = 'Free' | 'Swimore Plus' | 'VIP' | 'VIP+'
 
@@ -30,11 +31,13 @@ interface SessionState {
   setUser: (user: UserProfile | null) => void
   setPlan: (plan: PlanTier) => void
   incrementUsage: (pool: 'basic' | 'pro' | 'max') => void
+  syncSession: () => Promise<void>
+  loginWithBackend: (email?: string, password?: string) => Promise<void>
   logout: () => void
 }
 
 export const useSessionStore = create<SessionState>((set) => ({
-  token: 'mock-session-jwt-alex-doe',
+  token: 'swimore-session-jwt-alex-doe',
   user: {
     id: 'usr_882910',
     name: 'Alex Doe',
@@ -87,6 +90,33 @@ export const useSessionStore = create<SessionState>((set) => ({
       if (pool === 'max') q.maxPoolUsed = Math.min(q.maxPoolUsed + 1, q.maxPoolLimit)
       return { quota: q }
     }),
+
+  syncSession: async () => {
+    try {
+      const [user, quotaData] = await Promise.all([
+        authService.getCurrentUser(),
+        authService.getQuotas(),
+      ])
+      set({
+        user,
+        quota: quotaData.quota,
+        isAuthenticated: true,
+      })
+    } catch {
+      // Keep default mock session when backend is offline
+    }
+  },
+
+  loginWithBackend: async (email, password) => {
+    try {
+      const { token, user } = await authService.login(email, password)
+      set({ token, user, isAuthenticated: true })
+      const { quota } = await authService.getQuotas()
+      set({ quota })
+    } catch {
+      // Fallback
+    }
+  },
 
   logout: () =>
     set({

@@ -288,7 +288,7 @@ export const HomePage: React.FC = () => {
 
               {/* API Example Card */}
               <div className="rounded-xl border border-[#22272B] bg-[#0E1215] overflow-hidden">
-                <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-[#22272B]">
+                <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-[#22272B]">
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1.5">
                       <span className="px-2 py-0.5 rounded-full border border-[#22272B] text-[10px] font-mono text-[#5A626A]">

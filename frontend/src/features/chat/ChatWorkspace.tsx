@@ -17,6 +17,8 @@ import {
 } from 'lucide-react'
 import { useChatStore } from '@/store/chat-store'
 import { useSessionStore } from '@/store/session-store'
+import { gatewayService } from '@/services/gateway-service'
+import { modelService } from '@/services/model-service'
 
 export const ChatWorkspace: React.FC = () => {
   const location = useLocation()
@@ -46,14 +48,27 @@ export const ChatWorkspace: React.FC = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const modelsList = [
+  const [modelsList, setModelsList] = useState([
     'Claude 3.5 Sonnet',
     'Llama 3.3 70B',
     'DeepSeek R1',
     'GPT-4o',
     'Gemini 1.5 Pro',
     'Qwen 2.5 72B',
-  ]
+  ])
+
+  useEffect(() => {
+    modelService
+      .listModels()
+      .then((data) => {
+        if (data.length > 0) {
+          setModelsList(data.map((m) => m.name))
+        }
+      })
+      .catch(() => {
+        // Retain fallback model list
+      })
+  }, [])
 
   useEffect(() => {
     if (location.state?.privateMode !== undefined) {
@@ -104,21 +119,15 @@ export const ChatWorkspace: React.FC = () => {
 
   const handleReportIncident = async () => {
     try {
-      const res = await fetch('/api/v1/incidents/report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: activeModel,
-          partner_handle: '@novacompute',
-          issue_type: 'modeldown',
-          description: 'Triggered from chat interface',
-          source: 'UI_MANUAL',
-        }),
+      await gatewayService.reportIncident({
+        model: activeModel,
+        partner_handle: '@novacompute',
+        issue_type: 'modeldown',
+        description: 'Triggered from chat interface',
+        source: 'UI_MANUAL',
       })
-      if (res.ok) {
-        setIncidentReported(true)
-        setTimeout(() => setIncidentReported(false), 5000)
-      }
+      setIncidentReported(true)
+      setTimeout(() => setIncidentReported(false), 5000)
     } catch {
       // fallback
     }
@@ -280,11 +289,13 @@ export const ChatWorkspace: React.FC = () => {
         <div className="pt-3 border-t border-[#22272B] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-full bg-[#7C3AED] text-white flex items-center justify-center text-xs font-bold shadow-sm">
-              A
+              {(user?.name || 'Alex Doe')[0]}
             </div>
             <div className="flex flex-col">
-              <span className="text-xs font-medium text-[#F5F5F2]">Alex Doe</span>
-              <span className="text-[9px] font-mono text-[#00E599]">SWIMORE PLUS+</span>
+              <span className="text-xs font-medium text-[#F5F5F2]">{user?.name || 'Alex Doe'}</span>
+              <span className="text-[9px] font-mono text-[#00E599] uppercase">
+                {user?.plan ? `${user.plan}+` : 'SWIMORE PLUS+'}
+              </span>
             </div>
           </div>
           <button
@@ -585,7 +596,7 @@ export const ChatWorkspace: React.FC = () => {
             </div>
 
             {/* Bottom row inside input card */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#161B1E] mt-2">
+            <div className="flex items-center justify-between pt-3 border-t border-[#161B1E] mt-2">
               {/* Left pills: Model Picker, Effort, Search, Research */}
               <div className="flex items-center gap-2">
                 <div className="relative">

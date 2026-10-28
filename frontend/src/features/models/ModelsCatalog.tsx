@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Navbar } from '@/components/navigation/Navbar'
 import { Search, ChevronDown, ArrowRight } from 'lucide-react'
+import { modelService } from '@/services/model-service'
 
 export const ModelsCatalog: React.FC = () => {
   const navigate = useNavigate()
@@ -23,7 +24,7 @@ export const ModelsCatalog: React.FC = () => {
     'Cohere',
   ]
 
-  const models = [
+  const [models, setModels] = useState([
     {
       id: 'deepseek-r1',
       name: 'deepseek-r1',
@@ -35,7 +36,7 @@ export const ModelsCatalog: React.FC = () => {
       partnerBadge: 'FREE TIER',
     },
     {
-      id: 'claude-3-5-sonnet',
+      id: 'claude-3.5-sonnet',
       name: 'claude-3.5-sonnet',
       provider: 'Anthropic',
       price: '$3.00 in · $15.00 out',
@@ -45,7 +46,7 @@ export const ModelsCatalog: React.FC = () => {
       partnerBadge: 'PARTNER · NOVA COMPUTE',
     },
     {
-      id: 'llama-3-3-70b',
+      id: 'llama-3.3-70b',
       name: 'llama-3.3-70b',
       provider: 'Ollama',
       price: 'Free · 1 req / min',
@@ -65,7 +66,7 @@ export const ModelsCatalog: React.FC = () => {
       partnerBadge: 'PARTNER MARKET',
     },
     {
-      id: 'gemini-1-5-pro',
+      id: 'gemini-1.5-pro',
       name: 'gemini-1.5-pro',
       provider: 'Gemini',
       price: '$1.25 in · $5.00 out',
@@ -75,7 +76,7 @@ export const ModelsCatalog: React.FC = () => {
       partnerBadge: 'PARTNER · NOVA COMPUTE',
     },
     {
-      id: 'qwen-2-5-72b',
+      id: 'qwen-2.5-72b',
       name: 'qwen-2.5-72b',
       provider: 'Alibaba',
       price: 'Free · 1 req / min',
@@ -84,7 +85,31 @@ export const ModelsCatalog: React.FC = () => {
       tier: 'DEFAULT · FREE USE',
       partnerBadge: 'FREE TIER',
     },
-  ]
+  ])
+
+  useEffect(() => {
+    modelService
+      .listModels()
+      .then((data) => {
+        if (data.length > 0) {
+          setModels(
+            data.map((m) => ({
+              id: m.id,
+              name: m.name,
+              provider: m.provider,
+              price: `$${m.price_input.toFixed(2)} in · $${m.price_output.toFixed(2)} out`,
+              latency: m.latency_ms,
+              tps: m.throughput_tps,
+              tier: m.tier_badge,
+              partnerBadge: m.partner_badge || (m.tier_badge.includes('FREE') ? 'FREE TIER' : 'PARTNER MARKET'),
+            }))
+          )
+        }
+      })
+      .catch(() => {
+        // Retain fallback models when backend is offline
+      })
+  }, [])
 
   const leaderboardRows = [
     { rank: '01', model: 'Llama 3.3', provider: 'Meta', ttft: '190ms', speed: '95 T/s', quality: '88', uptime: '99.9%', status: 'Ready' },

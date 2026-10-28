@@ -1,8 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Navbar } from '@/components/navigation/Navbar'
 import { Plus, Search, ChevronDown, Copy, Check, RefreshCw } from 'lucide-react'
+import { usageService } from '@/services/usage-service'
+import { useSessionStore } from '@/store/session-store'
 
 export const ApiKeysDashboard: React.FC = () => {
+  const { quota } = useSessionStore()
   const [timeframe, setTimeframe] = useState<'day' | 'week' | 'month' | 'year'>('day')
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [keyName, setKeyName] = useState('prod backend')
@@ -42,18 +45,36 @@ export const ApiKeysDashboard: React.FC = () => {
     },
   ])
 
+  useEffect(() => {
+    usageService
+      .listKeys()
+      .then((keys) => {
+        if (keys.length > 0) {
+          setKeysList((prev) =>
+            keys.map((k, idx) => ({
+              id: k.id,
+              name: k.name,
+              rawKey: prev[idx]?.rawKey || k.key_prefix,
+              masked: k.key_prefix,
+              tokens: prev[idx]?.tokens || '0',
+              group: 'Swimore Plus',
+              category: 'Verified',
+              models: prev[idx]?.models || 'All approved models',
+              time: k.last_used || 'Just now',
+              latency: prev[idx]?.latency || 200,
+            }))
+          )
+        }
+      })
+      .catch(() => {
+        // Retain fallback keys
+      })
+  }, [])
+
   const handleCreateKey = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const res = await fetch('/api/v1/user/keys', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer swimore-session-jwt-alex-doe',
-        },
-        body: JSON.stringify({ name: keyName }),
-      })
-      const json = await res.json()
+      const json = await usageService.createKey(keyName)
       if (json.secret_key) {
         setNewKey(json.secret_key)
         setKeysList([
@@ -187,8 +208,10 @@ export const ApiKeysDashboard: React.FC = () => {
 
           <div className="p-4 rounded-xl border border-[#22272B] bg-[#0A0C0E] flex flex-col gap-1">
             <span className="text-[10px] text-[#5A626A]">FREE QUOTA LEFT</span>
-            <span className="text-xl font-bold text-[#F5F5F2]">18 / 50</span>
-            <span className="text-[10px] text-[#38BDF8]">Resets in 05:12:40</span>
+            <span className="text-xl font-bold text-[#F5F5F2]">
+              {Math.max(0, quota.basicPoolLimit - quota.basicPoolUsed)} / {quota.basicPoolLimit}
+            </span>
+            <span className="text-[10px] text-[#38BDF8]">Resets at {quota.resetsAt}</span>
           </div>
 
           <div className="p-4 rounded-xl border border-[#22272B] bg-[#0A0C0E] flex flex-col gap-1">

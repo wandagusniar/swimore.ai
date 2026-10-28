@@ -22,7 +22,10 @@ export async function streamChatCompletion(
   model: string,
   messages: ChatCompletionRequestMessage[],
   onChunk: (delta: string) => void,
-  onDone: (fullText: string, trace?: { path: string; model: string; latency: string }) => void,
+  onDone: (
+    fullText: string,
+    trace?: { path: string; model: string; latency: string; latencyMs: number }
+  ) => void,
   onError: (err: Error) => void
 ): Promise<void> {
   const token = useSessionStore.getState().token
@@ -50,6 +53,9 @@ export async function streamChatCompletion(
       throw new Error('Response body is null')
     }
 
+    const headerPath = response.headers.get('X-Swimore-Path') || 'Path A'
+    const headerModel = response.headers.get('X-Swimore-Model') || model
+
     const reader = response.body.getReader()
     const decoder = new TextDecoder('utf-8')
     let accumulated = ''
@@ -68,11 +74,12 @@ export async function streamChatCompletion(
         if (!trimmed || trimmed.startsWith(':')) continue
 
         if (trimmed === 'data: [DONE]') {
-          const latency = `${Date.now() - startTime} ms`
+          const latencyMs = Date.now() - startTime
           onDone(accumulated, {
-            path: 'Path A',
-            model,
-            latency,
+            path: headerPath,
+            model: headerModel,
+            latency: `${latencyMs} ms`,
+            latencyMs,
           })
           return
         }
@@ -92,11 +99,12 @@ export async function streamChatCompletion(
       }
     }
 
-    const latency = `${Date.now() - startTime} ms`
+    const latencyMs = Date.now() - startTime
     onDone(accumulated, {
-      path: 'Path A',
-      model,
-      latency,
+      path: headerPath,
+      model: headerModel,
+      latency: `${latencyMs} ms`,
+      latencyMs,
     })
   } catch (err: any) {
     onError(err instanceof Error ? err : new Error(String(err)))

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Navbar } from '@/components/navigation/Navbar';
 import { Copy, Check } from 'lucide-react';
+import { modelService, BackendModelCard } from '@/services/model-service';
 
 const codeSnippets: Record<string, string> = {
   cURL: `curl https://api.swimore.ai/v1/chat/completions \\
@@ -72,7 +73,15 @@ const rateLimits = [
 
 export const ModelDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const modelId = id || 'claude-3-5-sonnet';
+  const modelId = id || 'claude-3.5-sonnet';
+  const [liveModel, setLiveModel] = useState<BackendModelCard | null>(null);
+
+  useEffect(() => {
+    modelService
+      .getModel(modelId)
+      .then((m) => setLiveModel(m))
+      .catch(() => setLiveModel(null));
+  }, [modelId]);
 
   const [activeTab, setActiveTab] = useState<'overview' | 'performance' | 'api' | 'playground'>('overview');
   const [copied, setCopied] = useState(false);
@@ -109,21 +118,27 @@ export const ModelDetails: React.FC = () => {
 
           <div className="flex items-center space-x-2">
             <div className="w-12 h-12 rounded-xl bg-[#121619] border border-[#22272B] flex items-center justify-center font-mono text-sm font-bold text-[#F5F5F2]">
-              AN
+              {(liveModel?.provider || 'Anthropic').slice(0, 2).toUpperCase()}
             </div>
             <div className="flex flex-col">
-              <span className="text-[11px] font-mono text-[#98A0A8]">Models / Anthropic</span>
+              <span className="text-[11px] font-mono text-[#98A0A8]">
+                Models / {liveModel?.provider || 'Anthropic'}
+              </span>
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl lg:text-4xl font-normal tracking-tight">
-                  claude-3.5-<span className="font-serif italic">sonnet</span>
+                  {liveModel ? liveModel.name : (
+                    <>
+                      claude-3.5-<span className="font-serif italic">sonnet</span>
+                    </>
+                  )}
                 </h1>
               </div>
               <div className="flex items-center gap-2 mt-1">
                 <span className="px-2 py-0.5 rounded bg-[#00E599] text-[#060808] border border-[#00E599]/20 text-xs font-medium">
-                  SWIMORE PLUS+
+                  {liveModel?.tier_badge || 'SWIMORE PLUS+'}
                 </span>
                 <span className="px-2 py-0.5 rounded bg-[#161B1E] text-[#98A0A8] border border-[#22272B] text-xs font-mono">
-                  PARTNER · NOVA COMPUTE
+                  {liveModel?.partner_badge || 'PARTNER · NOVA COMPUTE'}
                 </span>
               </div>
             </div>
@@ -172,9 +187,21 @@ export const ModelDetails: React.FC = () => {
               {/* Stat Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                  { label: 'TPS (TOKENS / SEC)', value: '112.0 t/s', desc: 'Comprehensive throughput across all active routes' },
-                  { label: 'AVERAGE LATENCY', value: '410 ms', desc: 'Time to first token measured (TTFT) 99%' },
-                  { label: 'SUCCESS RATE', value: '98.4%', desc: 'All upstream requests across last 30 days' },
+                  {
+                    label: 'TPS (TOKENS / SEC)',
+                    value: liveModel ? `${liveModel.throughput_tps.toFixed(1)} t/s` : '112.0 t/s',
+                    desc: 'Comprehensive throughput across all active routes',
+                  },
+                  {
+                    label: 'AVERAGE LATENCY',
+                    value: liveModel ? `${liveModel.latency_ms} ms` : '410 ms',
+                    desc: 'Time to first token measured (TTFT) 99%',
+                  },
+                  {
+                    label: 'SUCCESS RATE',
+                    value: liveModel ? `${liveModel.uptime_percent}%` : '98.4%',
+                    desc: 'All upstream requests across last 30 days',
+                  },
                 ].map((s) => (
                   <div key={s.label} className="bg-[#0A0C0E] rounded-2xl p-6 border border-[#22272B] flex flex-col gap-2">
                     <span className="font-mono text-[10px] uppercase tracking-widest text-[#98A0A8]">{s.label}</span>
