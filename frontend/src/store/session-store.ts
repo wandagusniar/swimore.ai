@@ -9,6 +9,7 @@ export interface UserProfile {
   email: string
   plan: PlanTier
   isPartner: boolean
+  isAdmin?: boolean
   avatarUrl?: string
 }
 
@@ -44,6 +45,7 @@ export const useSessionStore = create<SessionState>((set) => ({
     email: 'alex.doe@example.com',
     plan: 'Swimore Plus',
     isPartner: false,
+    isAdmin: true,
   },
   quota: {
     basicPoolUsed: 32,
