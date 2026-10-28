@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   Plus,
   Search,
@@ -22,7 +22,9 @@ import { modelService } from '@/services/model-service'
 
 export const ChatWorkspace: React.FC = () => {
   const location = useLocation()
+  const navigate = useNavigate()
   const {
+    activeSessionId,
     isPrivateMode,
     setIsPrivateMode,
     activeModel,
@@ -36,7 +38,8 @@ export const ChatWorkspace: React.FC = () => {
     isStreaming,
   } = useChatStore()
 
-  const { user } = useSessionStore()
+  const { user, setPlan } = useSessionStore()
+  const isFreePlan = !user || user.plan === 'Free'
 
   const [privacyDropdownOpen, setPrivacyDropdownOpen] = useState(false)
   const [modelDropdownOpen, setModelDropdownOpen] = useState(false)
@@ -71,8 +74,14 @@ export const ChatWorkspace: React.FC = () => {
   }, [])
 
   useEffect(() => {
+    if (isFreePlan) {
+      setIsPrivateMode(true)
+    }
+  }, [isFreePlan, setIsPrivateMode])
+
+  useEffect(() => {
     if (location.state?.privateMode !== undefined) {
-      setIsPrivateMode(location.state.privateMode)
+      setIsPrivateMode(isFreePlan ? true : location.state.privateMode)
     }
     if (location.state?.model) {
       setActiveModel(location.state.model)
@@ -237,20 +246,37 @@ export const ChatWorkspace: React.FC = () => {
                   <span className="text-[10px] font-mono tracking-wider text-[#5A626A] uppercase px-2 font-medium">
                     SAVED
                   </span>
-                  <div className="flex flex-col gap-0.5">
-                    <div className="px-3 py-1.5 rounded-lg hover:bg-[#121619] text-xs text-[#98A0A8] hover:text-[#F5F5F2] flex items-center justify-between cursor-pointer">
-                      <span className="truncate">Fallback routing question</span>
-                      <span className="text-[10px] text-[#5A626A]">2h</span>
+                  {isFreePlan ? (
+                    <div className="px-3 py-2.5 rounded-lg bg-[#0E1215] border border-[#22272B] flex flex-col gap-1.5 text-[11px] text-[#98A0A8]">
+                      <span>Free plan uses temporary zero-log chats only (no history storage).</span>
+                      <Link
+                        to="/pricing"
+                        className="text-[#00E599] hover:underline font-mono text-[10px]"
+                      >
+                        Upgrade to Swimore Plus+ →
+                      </Link>
                     </div>
-                    <div className="px-3 py-1.5 rounded-lg hover:bg-[#121619] text-xs text-[#98A0A8] hover:text-[#F5F5F2] flex items-center justify-between cursor-pointer">
-                      <span className="truncate">Compare Claude vs DeepSeek</span>
-                      <span className="text-[10px] text-[#5A626A]">1d</span>
+                  ) : (
+                    <div className="flex flex-col gap-0.5">
+                      {filteredThreads.map((t) => (
+                        <div
+                          key={t.id}
+                          onClick={() => {
+                            selectSession(t.id)
+                            setSidebarOpen(false)
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-xs flex items-center justify-between cursor-pointer transition-colors ${
+                            activeSessionId === t.id
+                              ? 'bg-[#121619] text-[#F5F5F2]'
+                              : 'text-[#98A0A8] hover:bg-[#121619] hover:text-[#F5F5F2]'
+                          }`}
+                        >
+                          <span className="truncate">{t.title}</span>
+                          <span className="text-[10px] text-[#5A626A]">{t.updatedAt}</span>
+                        </div>
+                      ))}
                     </div>
-                    <div className="px-3 py-1.5 rounded-lg hover:bg-[#121619] text-xs text-[#98A0A8] hover:text-[#F5F5F2] flex items-center justify-between cursor-pointer">
-                      <span className="truncate">cURL for chat endpoint</span>
-                      <span className="text-[10px] text-[#5A626A]">2d</span>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </>
             ) : (
@@ -266,18 +292,23 @@ export const ChatWorkspace: React.FC = () => {
                     </span>
                   </div>
                   <div className="flex flex-col gap-0.5">
-                    <div className="px-3 py-1.5 rounded-lg hover:bg-[#121619] text-xs text-[#98A0A8] hover:text-[#F5F5F2] flex items-center justify-between cursor-pointer">
-                      <span className="truncate">Fallback routing question</span>
-                      <span className="text-[10px] text-[#5A626A]">2h</span>
-                    </div>
-                    <div className="px-3 py-1.5 rounded-lg hover:bg-[#121619] text-xs text-[#98A0A8] hover:text-[#F5F5F2] flex items-center justify-between cursor-pointer">
-                      <span className="truncate">Compare Claude vs DeepSeek</span>
-                      <span className="text-[10px] text-[#5A626A]">1d</span>
-                    </div>
-                    <div className="px-3 py-1.5 rounded-lg hover:bg-[#121619] text-xs text-[#98A0A8] hover:text-[#F5F5F2] flex items-center justify-between cursor-pointer">
-                      <span className="truncate">cURL for chat endpoint</span>
-                      <span className="text-[10px] text-[#5A626A]">2d</span>
-                    </div>
+                    {filteredThreads.map((t) => (
+                      <div
+                        key={t.id}
+                        onClick={() => {
+                          selectSession(t.id)
+                          setSidebarOpen(false)
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs flex items-center justify-between cursor-pointer transition-colors ${
+                          activeSessionId === t.id
+                            ? 'bg-[#121619] text-[#F5F5F2]'
+                            : 'text-[#98A0A8] hover:bg-[#121619] hover:text-[#F5F5F2]'
+                        }`}
+                      >
+                        <span className="truncate">{t.title}</span>
+                        <span className="text-[10px] text-[#5A626A]">{t.updatedAt}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </>
@@ -293,9 +324,16 @@ export const ChatWorkspace: React.FC = () => {
             </div>
             <div className="flex flex-col">
               <span className="text-xs font-medium text-[#F5F5F2]">{user?.name || 'Alex Doe'}</span>
-              <span className="text-[9px] font-mono text-[#00E599] uppercase">
-                {user?.plan ? `${user.plan}+` : 'SWIMORE PLUS+'}
-              </span>
+              <button
+                type="button"
+                onClick={() => setPlan(isFreePlan ? 'Swimore Plus' : 'Free')}
+                title="Click to switch plan tier (Free / Swimore Plus)"
+                className={`text-left text-[9px] font-mono uppercase hover:underline ${
+                  isFreePlan ? 'text-[#E0A458]' : 'text-[#00E599]'
+                }`}
+              >
+                {isFreePlan ? 'FREE PLAN (TEMP)' : `${user?.plan}+`}
+              </button>
             </div>
           </div>
           <button
@@ -380,25 +418,39 @@ export const ChatWorkspace: React.FC = () => {
                 {/* Option 1: Save to account */}
                 <div
                   onClick={() => {
+                    if (isFreePlan) {
+                      setPrivacyDropdownOpen(false)
+                      navigate('/pricing')
+                      return
+                    }
                     setIsPrivateMode(false)
                     setPrivacyDropdownOpen(false)
                   }}
                   className={`p-3 rounded-xl border cursor-pointer transition-all flex items-start justify-between ${
-                    !isPrivateMode
+                    !isPrivateMode && !isFreePlan
                       ? 'border-[#00E599]/40 bg-[#00E599]/5'
                       : 'border-[#22272B] bg-[#121619] hover:border-[#333A40]'
                   }`}
                 >
                   <div className="flex gap-2.5">
                     <Cloud className="w-4 h-4 text-[#00E599] flex-shrink-0 mt-0.5" />
-                    <div className="flex flex-col">
-                      <span className="text-xs font-medium text-[#F5F5F2]">Save to account</span>
+                    <div className="flex flex-col gap-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-[#F5F5F2]">Save to account</span>
+                        {isFreePlan && (
+                          <span className="px-1.5 py-0.2 rounded bg-[#00E599]/15 border border-[#00E599]/30 font-mono text-[9px] text-[#00E599] uppercase">
+                            SWIMORE PLUS+
+                          </span>
+                        )}
+                      </div>
                       <span className="text-[11px] text-[#98A0A8] leading-snug">
-                        History is stored in your account and syncs across devices.
+                        {isFreePlan
+                          ? 'Free plan chats are temporary only. Upgrade to store history across devices →'
+                          : 'History is stored in your account and syncs across devices.'}
                       </span>
                     </div>
                   </div>
-                  {!isPrivateMode && <Check className="w-4 h-4 text-[#00E599] flex-shrink-0" />}
+                  {!isPrivateMode && !isFreePlan && <Check className="w-4 h-4 text-[#00E599] flex-shrink-0" />}
                 </div>
 
                 {/* Option 2: Private */}
@@ -425,9 +477,14 @@ export const ChatWorkspace: React.FC = () => {
                   {isPrivateMode && <Check className="w-4 h-4 text-[#E0A458] flex-shrink-0" />}
                 </div>
 
-                <span className="text-[10px] text-[#5A626A] text-center pt-1 border-t border-[#1E2328]">
-                  Applies to this chat only. Change anytime.
-                </span>
+                <div className="flex flex-col gap-1 pt-1 border-t border-[#1E2328] text-center">
+                  <span className="text-[10px] text-[#5A626A]">
+                    Applies to this chat only. Change anytime.
+                  </span>
+                  <span className="text-[9px] font-mono text-[#5A626A] leading-tight">
+                    Usage metadata (tokens/model/timestamp) is metered; raw prompts are never logged in Private mode.
+                  </span>
+                </div>
               </div>
             )}
           </div>
@@ -439,12 +496,21 @@ export const ChatWorkspace: React.FC = () => {
             <span className="flex items-center gap-2">
               <Lock className="w-3.5 h-3.5" /> Private session. No queries or responses are stored. Zero-log mode active.
             </span>
-            <button
-              onClick={() => setIsPrivateMode(false)}
-              className="underline hover:text-white transition-colors cursor-pointer text-xs font-medium"
-            >
-              Save this chat
-            </button>
+            {isFreePlan ? (
+              <Link
+                to="/pricing"
+                className="underline hover:text-white transition-colors cursor-pointer text-xs font-medium"
+              >
+                Upgrade to save chats →
+              </Link>
+            ) : (
+              <button
+                onClick={() => setIsPrivateMode(false)}
+                className="underline hover:text-white transition-colors cursor-pointer text-xs font-medium"
+              >
+                Save this chat
+              </button>
+            )}
           </div>
         )}
 
@@ -656,11 +722,17 @@ export const ChatWorkspace: React.FC = () => {
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 text-xs">
                   <span className={isPrivateMode ? 'text-[#E0A458]' : 'text-[#98A0A8]'}>
-                    {isPrivateMode ? 'Private' : 'Saved'}
+                    {isFreePlan ? 'Temporary' : isPrivateMode ? 'Private' : 'Saved'}
                   </span>
                   <button
                     type="button"
-                    onClick={() => setIsPrivateMode(!isPrivateMode)}
+                    onClick={() => {
+                      if (isFreePlan) {
+                        setPrivacyDropdownOpen(true)
+                        return
+                      }
+                      setIsPrivateMode(!isPrivateMode)
+                    }}
                     className={`w-8 h-4.5 rounded-full transition-colors p-0.5 flex items-center ${
                       isPrivateMode ? 'bg-[#E0A458]' : 'bg-[#00E599]'
                     }`}
@@ -690,9 +762,9 @@ export const ChatWorkspace: React.FC = () => {
           </form>
 
           {/* Subtext below input */}
-          <span className="text-[11px] text-[#5A626A] mt-2">
+          <span className="text-[11px] text-[#5A626A] mt-2 text-center">
             {isPrivateMode
-              ? 'Private chats are zero-log: nothing is stored once you leave.'
+              ? 'Private chats are zero-log: nothing is stored once you leave. Usage metadata (tokens/model/timestamp) is metered.'
               : 'Saved chats are stored in your account. Switch to Private to keep a chat off the record.'}
           </span>
         </div>

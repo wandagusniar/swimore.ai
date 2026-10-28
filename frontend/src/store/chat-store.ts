@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { ephemeralStorage, DecryptedMessage } from '@/services/storage-service'
 import { streamChatCompletion } from '@/services/chat-service'
+import { useSessionStore } from '@/store/session-store'
 
 export interface ChatThreadMeta {
   id: string
@@ -68,6 +69,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
   isStreaming: false,
 
   setIsPrivateMode: (isPrivate) => {
+    const plan = useSessionStore.getState().user?.plan
+    if (!plan || plan === 'Free') {
+      set({ isPrivateMode: true })
+      return
+    }
     set({ isPrivateMode: isPrivate })
   },
 
@@ -76,13 +82,20 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   selectSession: async (sessionId) => {
-    const isPrivate = get().isPrivateMode
     try {
       const messages = await ephemeralStorage.getMessages(sessionId)
+      const thread = get().savedThreads.find((t) => t.id === sessionId)
       if (messages.length > 0) {
-        set({ activeSessionId: sessionId, currentMessages: messages })
+        set({
+          activeSessionId: sessionId,
+          currentMessages: messages,
+          activeModel: thread?.modelId || get().activeModel,
+        })
       } else {
-        set({ activeSessionId: sessionId })
+        set({
+          activeSessionId: sessionId,
+          activeModel: thread?.modelId || get().activeModel,
+        })
       }
     } catch (err) {
       console.warn('Error loading messages from ephemeral storage:', err)
@@ -91,7 +104,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   createNewChat: async (isPrivateOverride) => {
-    const isPrivate = isPrivateOverride !== undefined ? isPrivateOverride : get().isPrivateMode
+    const plan = useSessionStore.getState().user?.plan
+    const isFree = !plan || plan === 'Free'
+    const isPrivate = isFree ? true : isPrivateOverride !== undefined ? isPrivateOverride : get().isPrivateMode
     const newId = `session_${Date.now()}`
     const model = get().activeModel
     const newThread: ChatThreadMeta = {

@@ -2,16 +2,17 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Navbar } from '@/components/navigation/Navbar'
 import { ArrowUp, Play, Plus, ChevronDown, TrendingUp } from 'lucide-react'
+import { useSessionStore } from '@/store/session-store'
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate()
+  const { user } = useSessionStore()
   const [prompt, setPrompt] = useState('')
   const [selectedModel, setSelectedModel] = useState('swimore/auto-fast')
   const [saveChat, setSaveChat] = useState(true)
   const [modelDropdownOpen, setModelDropdownOpen] = useState(false)
   const [demoModalOpen, setDemoModalOpen] = useState(false)
   const [faqOpenIndex, setFaqOpenIndex] = useState(0)
-  const [apiTab, setApiTab] = useState<'structured' | 'streaming'>('streaming')
 
   const availableModels = [
     { id: 'swimore/auto-fast', name: 'swimore/auto-fast (Sub-second fallback)' },
@@ -82,10 +83,10 @@ export const HomePage: React.FC = () => {
       <main className="w-full flex-1 flex flex-col items-center px-6">
         {/* UPPER SECTION: Playground Hero */}
         <section className="w-full max-w-[820px] flex flex-col items-center pt-8 pb-16">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="w-2 h-2 rounded-full bg-[#00E599]" />
+          <div className="flex items-center gap-2 mb-4 border border-[#22272B] bg-[#0A0C0E]/80 rounded-full px-3.5 py-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00E599]" />
             <span className="font-mono text-xs uppercase tracking-widest text-[#98A0A8]">
-              PLAYGROUND · ASK ANYTHING
+              PLAYGROUND · ROUTER DEMO
             </span>
           </div>
 
@@ -95,38 +96,40 @@ export const HomePage: React.FC = () => {
             className="w-full rounded-2xl bg-[#0A0C0E] border border-[#22272B] p-5 flex flex-col justify-between shadow-2xl relative transition-all focus-within:border-[#333A40]"
           >
             {/* Card Top Row */}
-            <div className="flex items-center justify-between pb-3">
-              <button
-                type="button"
-                onClick={() => setPrompt('')}
-                className="w-7 h-7 rounded-full bg-[#121619] border border-[#22272B] hover:border-[#333A40] flex items-center justify-center text-[#98A0A8] hover:text-[#F5F5F2] transition-colors"
-                title="Clear input"
-              >
-                <Plus className="w-3.5 h-3.5" />
-              </button>
-
-              <div className="flex items-center gap-3 text-xs">
-                <span className="text-[#98A0A8]">Save chat history</span>
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-2">
+              <div className="flex items-center gap-2 font-mono text-xs">
                 <button
                   type="button"
-                  onClick={() => setSaveChat(!saveChat)}
+                  onClick={() => setPrompt('')}
+                  className="w-6 h-6 rounded-full bg-[#121619] border border-[#22272B] hover:border-[#333A40] flex items-center justify-center text-[#98A0A8] hover:text-[#F5F5F2] transition-colors"
+                  title="Clear input"
+                >
+                  <Plus className="w-3 h-3" />
+                </button>
+                <span className="text-[#98A0A8]">Session #4912</span>
+              </div>
+
+              <div className="flex items-center gap-2.5 text-xs">
+                <span className="text-[#98A0A8]">
+                  {user?.plan === 'Free' ? 'Free plan · temporary chat' : 'Save chat history'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (user?.plan !== 'Free') setSaveChat(!saveChat)
+                  }}
                   className={`w-9 h-5 rounded-full transition-colors p-0.5 flex items-center ${
-                    saveChat ? 'bg-[#00E599]' : 'bg-[#22272B]'
+                    user?.plan === 'Free' ? 'bg-[#22272B] cursor-not-allowed' : saveChat ? 'bg-[#00E599]' : 'bg-[#22272B]'
                   }`}
                   aria-label="Toggle chat history"
                 >
                   <div
                     className={`w-4 h-4 rounded-full bg-white transition-transform ${
-                      saveChat ? 'translate-x-4' : 'translate-x-0'
+                      user?.plan !== 'Free' && saveChat ? 'translate-x-4' : 'translate-x-0'
                     }`}
                   />
                 </button>
-                <Link
-                  to="/chat"
-                  className="text-[#98A0A8] hover:text-[#F5F5F2] transition-colors ml-1"
-                >
-                  Sign in to chat
-                </Link>
+                <span className="font-mono text-[11px] text-[#00E599]">Enterprise zero-log</span>
               </div>
             </div>
 
@@ -140,7 +143,7 @@ export const HomePage: React.FC = () => {
                   handleSendPrompt()
                 }
               }}
-              placeholder="Try Swimore — ask anything..."
+              placeholder="Send a prompt to test dynamic model routing across 200+ providers..."
               rows={3}
               className="w-full bg-transparent border-0 resize-none text-[#F5F5F2] placeholder-[#5A626A] text-sm leading-relaxed focus:outline-none py-2"
             />
@@ -152,8 +155,9 @@ export const HomePage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setModelDropdownOpen(!modelDropdownOpen)}
-                  className="py-1.5 px-3 rounded-full bg-[#121619] border border-[#22272B] hover:border-[#333A40] text-xs font-mono text-[#F5F5F2] flex items-center gap-1.5 transition-all"
+                  className="py-1.5 px-3 rounded-full bg-[#121619] border border-[#22272B] hover:border-[#333A40] text-xs font-mono text-[#F5F5F2] flex items-center gap-2 transition-all"
                 >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#00E599]" />
                   <span>{selectedModel}</span>
                   <ChevronDown className="w-3 h-3 text-[#98A0A8]" />
                 </button>
@@ -168,11 +172,7 @@ export const HomePage: React.FC = () => {
                           setSelectedModel(m.id)
                           setModelDropdownOpen(false)
                         }}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-colors flex items-center justify-between ${
-                          selectedModel === m.id
-                            ? 'bg-[#1E2328] text-[#00E599] font-medium'
-                            : 'text-[#98A0A8] hover:text-[#F5F5F2] hover:bg-[#161B1E]'
-                        }`}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-colors flex items-center justify-between ${selectedModel === m.id ? 'bg-[#1E2328] text-[#00E599] font-medium' : 'text-[#98A0A8] hover:text-[#F5F5F2] hover:bg-[#161B1E]'}`}
                       >
                         <span className="truncate">{m.name}</span>
                         {selectedModel === m.id && (
@@ -188,11 +188,7 @@ export const HomePage: React.FC = () => {
               <button
                 type="submit"
                 disabled={!prompt.trim()}
-                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-                  prompt.trim()
-                    ? 'bg-[#F5F5F2] text-[#060808] hover:scale-105 active:scale-95 shadow-md'
-                    : 'bg-[#1A1F24] text-[#5A626A] border border-[#22272B]'
-                }`}
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${prompt.trim() ? 'bg-[#F5F5F2] text-[#060808] hover:scale-105 active:scale-95 shadow-md' : 'bg-[#1A1F24] text-[#5A626A] border border-[#22272B]'}`}
                 aria-label="Send prompt to chat"
               >
                 <ArrowUp className="w-4 h-4 stroke-[2.5]" />
@@ -206,9 +202,7 @@ export const HomePage: React.FC = () => {
               <button
                 key={text}
                 type="button"
-                onClick={() => {
-                  setPrompt(text)
-                }}
+                onClick={() => setPrompt(text)}
                 className="py-1.5 px-4 rounded-full bg-[#0A0C0E] border border-[#22272B] hover:border-[#333A40] text-xs text-[#98A0A8] hover:text-[#F5F5F2] transition-all hover:bg-[#121619]"
               >
                 {text}
@@ -232,17 +226,16 @@ export const HomePage: React.FC = () => {
             {/* Left Column: Heading & Subtitle */}
             <div className="lg:col-span-6 flex flex-col gap-6">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#00E599]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#00E599]" />
                 <span className="font-mono text-xs uppercase tracking-widest text-[#98A0A8]">
-                  INTRODUCING AI · API GATEWAY · API MARKETPLACE
+                  MULTI-PROVIDER AI CHAT · API GATEWAY · API MARKETPLACE
                 </span>
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-normal leading-[1.05] tracking-tight">
                 Intelligence,<br />
-                <span className="font-serif italic font-normal text-[#F5F5F2]">
-                  Routed Seamlessly.
-                </span>
+                routed<br />
+                seamlessly.
               </h1>
 
               <p className="text-base text-[#98A0A8] max-w-lg leading-relaxed">
@@ -266,85 +259,131 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Column: API Example Panel */}
-            <div className="lg:col-span-6 rounded-2xl border border-[#22272B] bg-[#0A0C0E] p-5 flex flex-col gap-4 shadow-xl">
-              {/* Structured / Streaming Tabs */}
-              <div className="flex items-center gap-1 p-1 rounded-full bg-[#121619] border border-[#22272B] w-fit">
-                {(['structured', 'streaming'] as const).map((tab) => (
-                  <button
-                    key={tab}
-                    type="button"
-                    onClick={() => setApiTab(tab)}
-                    className={`px-4 py-1.5 rounded-full text-xs font-mono capitalize transition-colors ${
-                      apiTab === tab
-                        ? 'bg-[#1E2328] text-[#00E599]'
-                        : 'text-[#98A0A8] hover:text-[#F5F5F2]'
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                ))}
+            {/* Right Column: LIVE ROUTING TELEMETRY Diagram */}
+            <div className="lg:col-span-6 rounded-2xl border border-[#22272B] bg-[#0A0C0E]/95 p-5 sm:p-6 flex flex-col gap-5 shadow-2xl">
+              {/* Header Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#161B1E] font-mono text-[10px] tracking-widest uppercase">
+                <div className="flex items-center gap-2 text-[#F5F5F2] font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#00E599]" />
+                  <span>LIVE ROUTING TELEMETRY</span>
+                </div>
+                <div className="text-[#98A0A8]">
+                  LATENCY ROUTING · HEALTH-AWARE · <span className="text-[#00E599]">SOC2 COMPLIANT</span>
+                </div>
               </div>
 
-              {/* API Example Card */}
-              <div className="rounded-xl border border-[#22272B] bg-[#0E1215] overflow-hidden">
-                <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-[#22272B]">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5">
-                      <span className="px-2 py-0.5 rounded-full border border-[#22272B] text-[10px] font-mono text-[#5A626A]">
-                        GET
-                      </span>
-                      <span className="px-2 py-0.5 rounded-full bg-[#00E599]/15 border border-[#00E599]/40 text-[10px] font-mono text-[#00E599]">
-                        POST
-                      </span>
-                    </div>
-                    <span className="font-mono text-xs text-[#F5F5F2]">/chat/completions</span>
-                  </div>
-                  <span className="py-1 px-3 rounded-full bg-[#121619] border border-[#22272B] text-[11px] font-mono text-[#F5F5F2] flex items-center gap-1.5 whitespace-nowrap">
-                    swimore/auto-fast
-                    <ChevronDown className="w-3 h-3 text-[#98A0A8]" />
+              {/* Flow Row 1: Request Input -> Decision Policy Engine */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="rounded-xl border border-[#22272B] bg-[#0E1215] px-4 py-3 flex flex-col gap-1 shrink-0">
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-[#5A626A]">REQUEST INPUT</span>
+                  <span className="font-mono text-xs font-semibold text-[#F5F5F2]">POST /v1/chat</span>
+                </div>
+
+                <div className="hidden sm:flex items-center text-[#00E599] font-mono text-xs shrink-0">
+                  ───→
+                </div>
+
+                <div className="flex-1 rounded-xl border border-[#00E599]/40 bg-[#091813]/70 px-4 py-3 flex flex-col gap-0.5 shadow-[0_0_24px_rgba(0,229,153,0.08)]">
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-[#00E599]">
+                    DECISION POLICY ENGINE
+                  </span>
+                  <span className="text-sm font-semibold text-[#F5F5F2]">Swimore Gateway Router</span>
+                  <span className="font-mono text-[10px] text-[#98A0A8]">
+                    Dynamic Latency · Token Price · Real-time SLA
                   </span>
                 </div>
-                <pre className="px-4 py-4 font-mono text-xs leading-relaxed text-[#98A0A8] overflow-x-auto">
-{`{
-  "model": "swimore/auto-fast",
-  "messages": [{ "role": "user", "content": "Hello" }]
-}`}
-                </pre>
               </div>
 
-              {/* Mini Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Link
-                  to="/chat"
-                  className="rounded-xl border border-[#22272B] bg-[#0E1215] p-4 flex flex-col gap-1.5 hover:border-[#333A40] transition-colors"
-                >
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-[#00E599]">EXPLORE AI API</span>
-                  <span className="text-sm text-[#F5F5F2]">One key, 200+ models through a single gateway.</span>
-                </Link>
-                <Link
-                  to="/marketplace"
-                  className="rounded-xl border border-[#22272B] bg-[#0E1215] p-4 flex flex-col gap-1.5 hover:border-[#333A40] transition-colors"
-                >
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-[#E5A93C]">EXPLORE AI PROVIDER</span>
-                  <span className="text-sm text-[#F5F5F2]">Sell API access and unique pricing on the marketplace.</span>
-                </Link>
+              {/* Flow Row 2: Tier 1 Direct Foundation Endpoints */}
+              <div className="flex flex-col gap-2.5">
+                <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[10px]">
+                  <span className="uppercase tracking-widest text-[#98A0A8]">
+                    TIER 1: DIRECT FOUNDATION ENDPOINTS
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-[#00E599]/10 border border-[#00E599]/30 text-[#00E599]">
+                    Active Optimal Route
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 font-mono">
+                  {[
+                    { name: 'OpenAI', latency: '32ms', active: false },
+                    { name: 'Anthropic', latency: '31ms', active: false },
+                    { name: 'DeepSeek', latency: '28ms ★', active: true },
+                    { name: 'ZAI', latency: '34ms', active: false },
+                    { name: 'GLM', latency: '36ms', active: false },
+                  ].map((node) => (
+                    <div
+                      key={node.name}
+                      className={`rounded-xl px-3 py-2.5 flex flex-col gap-1 border transition-colors ${
+                        node.active
+                          ? 'border-[#00E599] bg-[#00E599]/10 text-[#00E599]'
+                          : 'border-[#22272B] bg-[#0E1215] text-[#F5F5F2]'
+                      }`}
+                    >
+                      <span className="text-[11px] font-medium truncate">{node.name}</span>
+                      <span className={`text-[10px] ${node.active ? 'text-[#00E599] font-semibold' : 'text-[#98A0A8]'}`}>
+                        {node.latency}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* Create API Key */}
-              <Link
-                to="/dashboard/keys"
-                className="self-start px-5 py-2 rounded-full bg-[#00E599] hover:bg-[#00E599]/90 text-[#060808] text-xs font-mono uppercase tracking-widest transition-colors"
-              >
-                Create API Key
-              </Link>
+              {/* Flow Row 3: Tier 2 Marketplace Node Fallback */}
+              <div className="flex flex-col gap-2.5">
+                <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[10px]">
+                  <span className="uppercase tracking-widest text-[#98A0A8]">
+                    TIER 2: MARKETPLACE NODE FALLBACK
+                  </span>
+                  <span className="text-[#5A626A]">Spot Reserve Capacity</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono">
+                  <div className="rounded-xl border border-[#22272B] bg-[#0E1215] px-3.5 py-2.5 flex items-center justify-between gap-2">
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="text-[11px] font-medium text-[#F5F5F2] truncate">Provider Cluster Alpha</span>
+                      <span className="text-[10px] text-[#98A0A8]">Llama 3.3 70B</span>
+                    </div>
+                    <span className="text-[11px] text-[#00E599] shrink-0">$0.30 / 1M</span>
+                  </div>
+
+                  <div className="rounded-xl border border-[#22272B] bg-[#0E1215] px-3.5 py-2.5 flex items-center justify-between gap-2">
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="text-[11px] font-medium text-[#F5F5F2] truncate">Provider Cluster Beta</span>
+                      <span className="text-[10px] text-[#98A0A8]">Qwen 2.5 72B</span>
+                    </div>
+                    <span className="text-[11px] text-[#00E599] shrink-0">$0.32 / 1M</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Telemetry */}
+              <div className="pt-3 border-t border-[#161B1E] flex flex-col gap-2 font-mono text-[10px]">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-3 text-[#98A0A8]">
+                    <span className="flex items-center gap-1.5 text-[#F5F5F2]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#00E599]" /> Direct route selected
+                    </span>
+                    <span className="flex items-center gap-1 text-[#00E599]">● Zero failover drop</span>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#00E599]/10 border border-[#00E599]/30 text-[#00E599]">
+                    ● Status: 200 OK
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 text-[#5A626A]">
+                  <span>Telemetry: 14-sample rolling window</span>
+                  <span>P99: 44ms · Loss: 0.00%</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
         {/* Stats Band */}
         <section className="w-full max-w-[1240px] py-12 mb-12">
-          <div className="flex flex-col sm:flex-row flex-wrap gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="flex flex-col gap-2 rounded-2xl border border-[#22272B] bg-[#0A0C0E] p-6">
               <div className="text-5xl font-semibold text-[#F5F5F2]">12ms</div>
               <div className="text-sm text-[#98A0A8] font-mono uppercase tracking-widest">Avg latency</div>
@@ -466,7 +505,20 @@ export const HomePage: React.FC = () => {
                     03
                   </div>
                 </div>
-                <div className="text-xs font-mono">← →</div>
+                <div className="flex items-center justify-between mt-3">
+                  <div className="flex items-center gap-2">
+                    <div className="rounded-full border border-[#22272B] px-2 py-1 text-xs text-[#98A0A8]">
+                      01
+                    </div>
+                    <div className="rounded-full border border-[#22272B] px-2 py-1 text-xs text-[#98A0A8]">
+                      02
+                    </div>
+                    <div className="rounded-full border border-[#22272B] px-2 py-1 text-xs text-[#98A0A8]">
+                      03
+                    </div>
+                  </div>
+                  <div className="text-xs font-mono">← →</div>
+                </div>
               </div>
             </div>
             <div className="flex flex-col items-start gap-4 rounded-2xl border border-[#22272B] bg-[#0A0C0E] p-6">
@@ -509,9 +561,7 @@ export const HomePage: React.FC = () => {
                 to="/docs"
                 className="absolute top-2 right-2 text-[#00E599]"
               >
-                <span className="w-2 h-2 rounded-full bg-[#00E599]">
-                  ↗
-                </span>
+                <span className="w-2 h-2 rounded-full bg-[#00E599]">↗</span>
               </Link>
               <Link to="/docs" className="text-[#00E599]">
                 Read quickstart →
@@ -694,8 +744,12 @@ export const HomePage: React.FC = () => {
                 <Link to="/docs" className="text-[#98A0A8] hover:text-[#F5F5F2]">
                   Documentation
                 </Link>
-                <a href="#" className="text-[#98A0A8] hover:text-[#F5F5F2]">Privacy</a>
-                <a href="#" className="text-[#98A0A8] hover:text-[#F5F5F2]">Terms of Service</a>
+                <a href="#" className="text-[#98A0A8] hover:text-[#F5F5F2]">
+                  Privacy
+                </a>
+                <a href="#" className="text-[#98A0A8] hover:text-[#F5F5F2]">
+                  Terms of Service
+                </a>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#00E599]" />
@@ -705,46 +759,45 @@ export const HomePage: React.FC = () => {
           </div>
         </footer>
 
-      </main>
-
-      {/* Demo Modal */}
-      {demoModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="max-w-lg w-full rounded-2xl bg-[#0A0C0E] border border-[#22272B] p-6 flex flex-col gap-4 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-[#22272B]">
-              <span className="font-mono text-sm font-semibold text-[#F5F5F2]">
-                SWIMORE AI · ARCHITECTURE OVERVIEW
-              </span>
-              <button
-                onClick={() => setDemoModalOpen(false)}
-                className="text-[#98A0A8] hover:text-[#F5F5F2] text-sm"
-              >
-                ✕
-              </button>
-            </div>
-            <p className="text-xs text-[#98A0A8] leading-relaxed">
-              Swimore routes incoming AI inference requests dynamically across direct upstream LLMs (Path A) and verified partner endpoints (Path B) with automatic failover, SeaBank settlement, and strict zero-log metadata audit logging.
-            </p>
-            <div className="pt-2 flex justify-end gap-3">
-              <button
-                onClick={() => setDemoModalOpen(false)}
-                className="px-4 py-2 rounded-full border border-[#22272B] text-xs text-[#98A0A8] hover:text-[#F5F5F2]"
-              >
-                Close
-              </button>
-              <button
-                onClick={() => {
-                  setDemoModalOpen(false)
-                  navigate('/chat')
-                }}
-                className="px-4 py-2 rounded-full bg-[#F5F5F2] text-[#060808] text-xs font-medium hover:bg-white"
-              >
-                Launch Chat Workspace →
-              </button>
+        {/* Demo Modal */}
+        {demoModalOpen && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="max-w-lg w-full rounded-2xl bg-[#0A0C0E] border border-[#22272B] p-6 flex flex-col gap-4 shadow-2xl">
+              <div className="flex items-center justify-between pb-3 border-b border-[#22272B]">
+                <span className="font-mono text-sm font-semibold text-[#F5F5F2]">
+                  SWIMORE AI · ARCHITECTURE OVERVIEW
+                </span>
+                <button
+                  onClick={() => setDemoModalOpen(false)}
+                  className="text-[#98A0A8] hover:text-[#F5F5F2] text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+              <p className="text-xs text-[#98A0A8] leading-relaxed">
+                Swimore routes incoming AI inference requests dynamically across direct upstream LLMs (Path A) and verified partner endpoints (Path B) with automatic failover, SeaBank settlement, and strict zero-log metadata audit logging.
+              </p>
+              <div className="pt-2 flex justify-end gap-3">
+                <button
+                  onClick={() => setDemoModalOpen(false)}
+                  className="px-4 py-2 rounded-full border border-[#22272B] text-xs text-[#98A0A8] hover:text-[#F5F5F2]"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    setDemoModalOpen(false)
+                    navigate('/chat')
+                  }}
+                  className="px-4 py-2 rounded-full bg-[#F5F5F2] text-[#060808] text-xs font-medium hover:bg-white"
+                >
+                  Launch Chat Workspace →
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </main>
     </div>
   )
 }
