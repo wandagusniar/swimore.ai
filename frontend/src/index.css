@@ -53,3 +53,75 @@ body {
   text-shadow: none;
 }
 
+/* Underwater Floating Bubbles Overlay */
+.ocean-bubbles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+  overflow: hidden;
+}
+
+.ocean-bubble {
+  position: absolute;
+  bottom: -30px;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(245, 245, 242, 0.55) 0%,
+    rgba(56, 189, 248, 0.18) 45%,
+    rgba(56, 189, 248, 0.03) 75%,
+    transparent 100%
+  );
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.25), 0 0 8px rgba(56, 189, 248, 0.12);
+  animation-name: ocean-bubble-rise;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
+
+.ocean-bubble--teal {
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(245, 245, 242, 0.55) 0%,
+    rgba(0, 229, 153, 0.2) 45%,
+    rgba(0, 229, 153, 0.04) 75%,
+    transparent 100%
+  );
+  border-color: rgba(0, 229, 153, 0.3);
+  box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.25), 0 0 8px rgba(0, 229, 153, 0.14);
+}
+
+@keyframes ocean-bubble-rise {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.85);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.65;
+  }
+  35% {
+    transform: translate3d(var(--bubble-drift, 14px), -35vh, 0) scale(0.95);
+    opacity: 0.55;
+  }
+  68% {
+    transform: translate3d(calc(var(--bubble-drift, 14px) * -0.6), -72vh, 0) scale(1.03);
+    opacity: 0.45;
+  }
+  90% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: translate3d(calc(var(--bubble-drift, 14px) * 0.4), -112vh, 0) scale(1.08);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ocean-bubble {
+    animation: none;
+    display: none;
+  }
+}
