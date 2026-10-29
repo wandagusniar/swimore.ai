@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSessionStore } from '@/store/session-store';
+import { BrandIcon } from '@/components/layout/BrandIcon';
 
 interface NavbarProps {
   onSignInClick?: () => void;
@@ -8,8 +9,9 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onSignInClick }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname;
-  const { user, syncSession, loginWithBackend } = useSessionStore();
+  const { user, syncSession, logout } = useSessionStore();
 
   useEffect(() => {
     syncSession();
@@ -75,24 +77,31 @@ export const Navbar: React.FC<NavbarProps> = ({ onSignInClick }) => {
         {/* Right: Auth & CTA (Hard Right on md+) */}
         <div className="hidden md:flex items-center gap-4 text-xs flex-shrink-0">
           {user ? (
-            <Link
-              to="/dashboard/keys"
-              className="text-[#98A0A8] hover:text-[#F5F5F2] transition-colors flex items-center gap-1.5"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00E599]" />
-              {user.name}
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                to="/dashboard/keys"
+                className="text-[#98A0A8] hover:text-[#F5F5F2] transition-colors flex items-center gap-1.5"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#00E599]" />
+                {user.name}
+              </Link>
+              <button
+                onClick={() => {
+                  logout();
+                  navigate('/login');
+                }}
+                className="text-[#5A626A] hover:text-[#EF4444] transition-colors cursor-pointer"
+              >
+                Sign Out
+              </button>
+            </div>
           ) : (
-            <button
-              onClick={() => {
-                setIsOpen(false);
-                loginWithBackend();
-                onSignInClick?.();
-              }}
-              className="text-[#98A0A8] hover:text-[#F5F5F2] transition-colors cursor-pointer"
+            <Link
+              to="/login"
+              className="text-[#98A0A8] hover:text-[#F5F5F2] transition-colors"
             >
               Sign In
-            </button>
+            </Link>
           )}
           <Link
             to="/chat"
@@ -120,25 +129,34 @@ export const Navbar: React.FC<NavbarProps> = ({ onSignInClick }) => {
                 );
               })}
               {user ? (
-                <Link
-                  to="/dashboard/keys"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-center gap-1.5 py-2 transition-colors text-[#98A0A8] hover:text-[#F5F5F2]"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00E599]" />
-                  {user.name}
-                </Link>
+                <>
+                  <Link
+                    to="/dashboard/keys"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center justify-center gap-1.5 py-2 transition-colors text-[#98A0A8] hover:text-[#F5F5F2]"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#00E599]" />
+                    {user.name}
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      logout();
+                      navigate('/login');
+                    }}
+                    className="flex items-center justify-center py-2 transition-colors text-[#5A626A] hover:text-[#EF4444] w-full"
+                  >
+                    Sign Out
+                  </button>
+                </>
               ) : (
-                <button
-                  onClick={() => {
-                    setIsOpen(false);
-                    loginWithBackend();
-                    onSignInClick?.();
-                  }}
+                <Link
+                  to="/login"
+                  onClick={() => setIsOpen(false)}
                   className="flex items-center justify-center py-2 transition-colors text-[#98A0A8] hover:text-[#F5F5F2] w-full"
                 >
                   Sign In
-                </button>
+                </Link>
               )}
               <Link
                 to="/chat"

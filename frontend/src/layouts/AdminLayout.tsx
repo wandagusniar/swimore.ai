@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { Search, Zap, Menu } from 'lucide-react'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Search, Zap, Menu, LogOut } from 'lucide-react'
 import { useSessionStore } from '@/store/session-store'
 
 const navItems = [
@@ -21,7 +21,8 @@ const navItems = [
 export const AdminLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const location = useLocation()
-  const { user } = useSessionStore()
+  const navigate = useNavigate()
+  const { user, logout } = useSessionStore()
 
   const currentCrumb =
     navItems

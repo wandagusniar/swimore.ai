@@ -38,25 +38,18 @@ interface SessionState {
 }
 
 export const useSessionStore = create<SessionState>((set) => ({
-  token: 'swimore-session-jwt-alex-doe',
-  user: {
-    id: 'usr_882910',
-    name: 'Alex Doe',
-    email: 'alex.doe@example.com',
-    plan: 'Swimore Plus',
-    isPartner: false,
-    isAdmin: true,
-  },
+  token: null,
+  user: null,
   quota: {
-    basicPoolUsed: 32,
+    basicPoolUsed: 0,
     basicPoolLimit: 50,
     proPoolUsed: 0,
     proPoolLimit: 0,
-    maxPoolUsed: 14,
+    maxPoolUsed: 0,
     maxPoolLimit: 50,
     resetsAt: '00:00 WIB',
   },
-  isAuthenticated: true,
+  isAuthenticated: false,
 
   setToken: (token) => set({ token, isAuthenticated: !!token }),
   setUser: (user) => set({ user }),
