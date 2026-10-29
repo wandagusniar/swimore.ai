@@ -16,6 +16,16 @@ import AdminModelRegistry from '@/features/admin/AdminModelRegistry'
 import AdminRouting from '@/features/admin/AdminRouting'
 import AdminPools from '@/features/admin/AdminPools'
 import AdminBundles from '@/features/admin/AdminBundles'
+import { PartnerLayout } from '@/layouts/PartnerLayout'
+import PartnerOverview from '@/features/partner/PartnerOverview'
+import PartnerChannels from '@/features/partner/PartnerChannels'
+import PartnerModels from '@/features/partner/PartnerModels'
+import PartnerBundles from '@/features/partner/PartnerBundles'
+import PartnerQuota from '@/features/partner/PartnerQuota'
+import PartnerAnalytics from '@/features/partner/PartnerAnalytics'
+import PartnerCustomers from '@/features/partner/PartnerCustomers'
+import PartnerEarnings from '@/features/partner/PartnerEarnings'
+import PartnerSettings from '@/features/partner/PartnerSettings'
 import { AdminAnalytics } from '@/features/admin/AdminAnalytics'
 import { AdminLogs } from '@/features/admin/AdminLogs'
 import { AdminSecurity } from '@/features/admin/AdminSecurity'
@@ -74,6 +84,21 @@ export const router = createBrowserRouter([
       { path: 'logs', element: <AdminLogs /> },
       { path: 'security', element: <AdminSecurity /> },
       { path: 'settings', element: <AdminSettings /> },
+    ],
+  },
+  {
+    path: '/partner',
+    element: <PartnerLayout />,
+    children: [
+      { index: true, element: <PartnerOverview /> },
+      { path: 'channels', element: <PartnerChannels /> },
+      { path: 'models', element: <PartnerModels /> },
+      { path: 'bundles', element: <PartnerBundles /> },
+      { path: 'quota', element: <PartnerQuota /> },
+      { path: 'analytics', element: <PartnerAnalytics /> },
+      { path: 'customers', element: <PartnerCustomers /> },
+      { path: 'earnings', element: <PartnerEarnings /> },
+      { path: 'settings', element: <PartnerSettings /> },
     ],
   },
   {
